@@ -1,7 +1,12 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 
-import { CocktailSearch, RandomCocktail, CategorySearch } from './search'
+import {
+  CocktailSearch,
+  RandomCocktail,
+  CategorySearch,
+  IngredientSearch,
+} from './search'
 
 class Main extends React.Component {
   render() {
@@ -54,6 +59,18 @@ class Main extends React.Component {
         >
           <h2 className="major">Find by Category</h2>
           <CategorySearch />
+          {close}
+        </article>
+
+        <article
+          id="rep-category"
+          className={`${
+            this.props.article === 'rep-ingredients' ? 'active' : ''
+          } ${this.props.articleTimeout ? 'timeout' : ''}`}
+          style={{ display: 'none' }}
+        >
+          <h2 className="major">Find by Ingredient</h2>
+          <IngredientSearch />
           {close}
         </article>
       </div>

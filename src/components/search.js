@@ -472,3 +472,128 @@ export const CategorySearch = () => {
     </>
   )
 }
+
+// Search by ingredient component
+export const IngredientSearch = () => {
+  // initiate misMount
+  const isMount = useIsMount()
+
+  // State variable for handling text input
+  const [input, setInput] = useState('')
+
+  // State variable for holding submitted cocktail name
+  const [searchTerm, setSearchTerm] = useState('')
+
+  // State variable for holding retrieved API info
+  const [apiInfo, setApiInfo] = useState()
+
+  // State variable for whether something has been searched
+  const [searched, setSearched] = useState(false)
+
+  // Array holding common ingredients
+  const commonIngredients = [
+    'Gin',
+    'Whiskey',
+    'Vodka',
+    'Rum',
+    'Tequila',
+    'Brandy',
+  ]
+
+  const inputHandler = e => {
+    const value = e.target.value
+
+    setInput(value)
+  }
+
+  const handleSubmit = e => {
+    e.preventDefault()
+
+    const value = input
+    setSearchTerm(value)
+  }
+
+  const commonIngredientList = () => {
+    return (
+      <>
+        <label for="ingredient-category-select">
+          Select from popular categories:
+        </label>
+        <select name="categories" id="category-select">
+          <option value="" disabled selected>
+            {' '}
+            - Please select an option -{' '}
+          </option>
+          {commonIngredients.map(ingredient => (
+            <option value={ingredient}>{ingredient}</option>
+          ))}
+        </select>
+      </>
+    )
+  }
+  // Function to contain form
+  const searchForm = error => {
+    return (
+      <form>
+        <label>Search:</label>
+        <input type="text" onChange={inputHandler}></input>
+        <button onClick={handleSubmit}>Submit</button>
+        {/* If error is true, display error msg */}
+        {error && <p>Could not find cocktail. Please search again</p>}
+      </form>
+    )
+  }
+  useEffect(() => {
+    // TODO: prevent useEffect from occuring on first render
+    const url = `https://www.thecocktaildb.com/api/json/v1/1/filter.php?i=${searchTerm}`
+
+    // If isMount not true, then it is not first render and can fetch API data
+    if (!isMount) {
+      const fetchData = async () => {
+        try {
+          const response = await fetch(url)
+          const json = await response.json()
+          setApiInfo(json)
+          setSearched(true)
+        } catch (error) {
+          console.log('error', error)
+        }
+      }
+
+      fetchData()
+    } else {
+      return null
+    }
+  }, [searchTerm])
+
+  // Function used to display cocktails with simmiliar name if more than 1
+  const similarItems = api => {
+    const data = api.drinks
+    if (data.length > 1) {
+      return (
+        <>
+          <h4>View similar items</h4>
+          <ul>
+            {data.map(item => (
+              <li>
+                <a onClick={() => setSearchTerm(item.strDrink)}>
+                  {item.strDrink}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </>
+      )
+    }
+  }
+
+  // Otherwise, return regular form and drinks details
+  return (
+    <>
+      {apiInfo && similarItems(apiInfo)}
+      {searchForm()}
+
+      {commonIngredientList()}
+    </>
+  )
+}
