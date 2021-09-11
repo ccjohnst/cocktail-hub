@@ -106,7 +106,7 @@ const ingredients = api => {
   )
 }
 
-// Function to display cocktail items
+// Function to display cocktail items passed to apiInfo param
 const cocktailItem = apiInfo => {
   return (
     <>
@@ -138,12 +138,14 @@ export const CocktailSearch = () => {
   // State variable for whether something has been searched
   const [searched, setSearched] = useState(false)
 
+  // Handle text input on search
   const inputHandler = e => {
     const value = e.target.value
 
     setInput(value)
   }
 
+  // Handle submitted search value
   const handleSubmit = e => {
     e.preventDefault()
 
@@ -164,16 +166,17 @@ export const CocktailSearch = () => {
     )
   }
   useEffect(() => {
-    // TODO: prevent useEffect from occuring on first render
-    const url = `https://www.thecocktaildb.com/api/json/v1/1/search.php?s=${searchTerm}`
+    // parameter that contains search query
+    const searchParam = 'search.php?s='
 
     // If isMount not true, then it is not first render and can fetch API data
     if (!isMount) {
       const fetchData = async () => {
+        const url = `.netlify/functions/get-data?param=${searchParam}&id=${searchTerm}`
+
         try {
-          const response = await fetch(url)
-          const json = await response.json()
-          setApiInfo(json)
+          const response = await fetch(url).then(res => res.json())
+          setApiInfo(response)
           setSearched(true)
         } catch (error) {
           console.log('error', error)
@@ -219,12 +222,6 @@ export const CocktailSearch = () => {
   // Otherwise, return regular form and drinks details
   return (
     <>
-      {/* <h3>{apiInfo && apiInfo.drinks[0].strDrink}</h3> */}
-
-      {/* <span className="image main">
-        {apiInfo && <img src={apiInfo.drinks[0].strDrinkThumb} alt="" />}
-      </span> */}
-
       {apiInfo && <>{cocktailItem(apiInfo)}</>}
 
       {apiInfo && similarItems(apiInfo)}
@@ -244,15 +241,17 @@ export const RandomCocktail = () => {
   and when randomise button is clicked */
 
   useEffect(() => {
-    const url = `https://www.thecocktaildb.com/api/json/v1/1/random.php`
+    // const url = `https://www.thecocktaildb.com/api/json/v2/${process.env.API_KEY}/random.php`
+    const searchParam = `random.php`
 
     // If isMount true, then it is  first render and can fetch API data
     if (isMount) {
       const fetchData = async () => {
+        const url = `.netlify/functions/get-data?param=${searchParam}`
+
         try {
-          const response = await fetch(url)
-          const json = await response.json()
-          setRandomApi(json)
+          const response = await fetch(url).then(res => res.json())
+          setRandomApi(response)
         } catch (error) {
           console.log('error', error)
         }
@@ -261,10 +260,11 @@ export const RandomCocktail = () => {
       fetchData()
     } else if (!randomApi) {
       const fetchData = async () => {
+        const url = `.netlify/functions/get-data?param=${searchParam}`
+
         try {
-          const response = await fetch(url)
-          const json = await response.json()
-          setRandomApi(json)
+          const response = await fetch(url).then(res => res.json())
+          setRandomApi(response)
         } catch (error) {
           console.log('error', error)
         }
@@ -280,6 +280,7 @@ export const RandomCocktail = () => {
       <span className="image main">
         {randomApi && <img src={randomApi.drinks[0].strDrinkThumb} alt="" />}
       </span>
+      {/* If RandomAPI true then show intructions and ingrdients */}
       {randomApi && (
         <>
           <h4>Instructions</h4>
@@ -316,17 +317,20 @@ export const CategorySearch = () => {
   // State hook for holding ID of 'View Cocktail' item
   const [cocktailID, setCocktailID] = useState()
 
+  const [reset, setReset] = useState(false)
+
+  // useEffect hook for retrieving list of all cocktails from API
   useEffect(() => {
-    const url = `https://www.thecocktaildb.com/api/json/v1/1/list.php?c=list`
+    const searchParam = `list.php?c=list`
+    const url = `.netlify/functions/get-data?param=${searchParam}`
 
     // If isMount true, then it is  first render and can fetch API data
     if (isMount) {
       const fetchData = async () => {
         try {
-          const response = await fetch(url)
-          const json = await response.json()
+          const response = await fetch(url).then(res => res.json())
           // Set state to array of the json drinks categories
-          setCategories(oldData => [...oldData, json.drinks])
+          setCategories(oldData => [...oldData, response.drinks])
         } catch (error) {
           console.log('error', error)
         }
@@ -336,17 +340,17 @@ export const CategorySearch = () => {
     }
   }, [categories])
 
+  // useEffect hook for retrieving cocktails within selected category
   useEffect(() => {
-    const url = `https://www.thecocktaildb.com/api/json/v1/1/filter.php?c=${selectedCategory}`
-
+    const searchParam = `filter.php?c=`
+    const url = `.netlify/functions/get-data?param=${searchParam}&id=${selectedCategory}`
     // If isMount false, then it is not first render and can fetch API data
     if (!isMount) {
       const fetchData = async () => {
         try {
-          const response = await fetch(url)
-          const json = await response.json()
+          const response = await fetch(url).then(res => res.json())
           // Set state to array of the json drinks list
-          setCocktailList(oldData => [json.drinks])
+          setCocktailList(oldData => [response.drinks])
         } catch (error) {
           console.log('error', error)
         }
@@ -358,16 +362,20 @@ export const CategorySearch = () => {
 
   // useEffect hook for handling fetching data of selected cocktails
   useEffect(() => {
-    // TODO: prevent useEffect from occuring on first render
-    const url = `https://www.thecocktaildb.com/api/json/v1/1/lookup.php?i=${selectedCocktailID}`
+    const searchParam = `lookup.php?i=`
 
-    // If isMount not true, then it is not first render and can fetch API data
-    if (!isMount) {
+    /*If reset is true, return null to avoid fetching an invalid API due to cocktailID being false,
+    otherwise if isMount not true, then it is not first render and can fetch API data
+    */
+    if (reset) {
+      return null
+    } else if (!isMount) {
+      const url = `.netlify/functions/get-data?param=${searchParam}&id=${selectedCocktailID}`
+
       const fetchData = async () => {
         try {
-          const response = await fetch(url)
-          const json = await response.json()
-          setCocktailID(json)
+          const response = await fetch(url).then(res => res.json())
+          setCocktailID(response)
         } catch (error) {
           console.log('error', error)
         }
@@ -383,6 +391,8 @@ export const CategorySearch = () => {
   const handleSelectChange = e => {
     setSelectedCategory(e.target.value)
   }
+
+  // Function to display all categories as options
   const displayCategories = api => {
     return api[0].map((cata, index) => (
       <option value={cata.strCategory} key={cata.strCategory}>
@@ -391,15 +401,17 @@ export const CategorySearch = () => {
     ))
   }
 
+  // Handle's the 'view' button and ensures reset is false. Sets cocktail ID to target id
   const handleButton = e => {
     setSelectedCocktailID(e.target.id)
-    console.log(e.target.id)
+    setReset(false)
   }
 
-  // Function to hide
+  // Function to hide cocktail and sets cocktailID to be blank
   const handleHide = e => {
     setCocktailID()
     setSelectedCocktailID()
+    setReset(true)
   }
   const displayCocktailList = api => {
     return (
@@ -409,7 +421,8 @@ export const CategorySearch = () => {
             <h4>{cata.strDrink}</h4>
 
             <img src={cata.strDrinkThumb} height="125px" width="125px"></img>
-
+            {/* If cocktail ID is not undefined and therefore has been set for viewing
+            show the hide button, else show the vew button */}
             {cocktailID !== undefined ? (
               cata.idDrink === cocktailID.drinks[0].idDrink ? (
                 <button id={cata.idDrink} onClick={e => handleHide(e)}>
@@ -425,7 +438,7 @@ export const CategorySearch = () => {
                 View
               </button>
             )}
-
+            {/* Only show selected cocktail if CocktailID is true */}
             {cocktailID && (
               <div className="view-cocktail">
                 {cata.idDrink === cocktailID.drinks[0].idDrink &&
