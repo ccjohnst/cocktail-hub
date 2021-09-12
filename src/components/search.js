@@ -1,5 +1,9 @@
 import React, { useRef, useState, useEffect } from 'react'
+import { css } from "@emotion/react";
+import BarLoader from "react-spinners/BarLoader"
 
+
+const color = "#ffffff"
 // Custom hook to indicate whether current render is first render
 const useIsMount = () => {
   const isMountRef = useRef(true)
@@ -7,6 +11,16 @@ const useIsMount = () => {
     isMountRef.current = false
   }, [])
   return isMountRef.current
+}
+
+// // Global state hook for loading
+// const [loading, setLoading ] = useState(false)
+
+// Component for displaying loading icon
+const Loader = (loadingState) => {
+  return(
+   <p>loading...</p> 
+  )
 }
 
 // Function to create list items for measurements and ingredients
@@ -138,6 +152,9 @@ export const CocktailSearch = () => {
   // State variable for whether something has been searched
   const [searched, setSearched] = useState(false)
 
+  // State hook for Loading 
+  const [loading, setLoading ] = useState(false)
+
   // Handle text input on search
   const inputHandler = e => {
     const value = e.target.value
@@ -148,7 +165,6 @@ export const CocktailSearch = () => {
   // Handle submitted search value
   const handleSubmit = e => {
     e.preventDefault()
-
     const value = input
     setSearchTerm(value)
   }
@@ -169,15 +185,18 @@ export const CocktailSearch = () => {
     // parameter that contains search query
     const searchParam = 'search.php?s='
 
+
     // If isMount not true, then it is not first render and can fetch API data
     if (!isMount) {
       const fetchData = async () => {
         const url = `.netlify/functions/get-data?param=${searchParam}&id=${searchTerm}`
+        setLoading(true)
 
         try {
           const response = await fetch(url).then(res => res.json())
           setApiInfo(response)
           setSearched(true)
+          setLoading(false)
         } catch (error) {
           console.log('error', error)
         }
@@ -222,6 +241,9 @@ export const CocktailSearch = () => {
   // Otherwise, return regular form and drinks details
   return (
     <>
+    {/* {loading ?   <Loader loadingState={loading}/> : null } */}
+      <BarLoader loading={loading}  color={color}/>
+    
       {apiInfo && <>{cocktailItem(apiInfo)}</>}
 
       {apiInfo && similarItems(apiInfo)}
