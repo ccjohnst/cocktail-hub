@@ -1,9 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react'
-import { css } from "@emotion/react";
-import BarLoader from "react-spinners/BarLoader"
+import { css } from '@emotion/react'
+import ClipLoader from 'react-spinners/ClipLoader'
 
-
-const color = "#ffffff"
+const color = '#ffffff'
 // Custom hook to indicate whether current render is first render
 const useIsMount = () => {
   const isMountRef = useRef(true)
@@ -13,14 +12,9 @@ const useIsMount = () => {
   return isMountRef.current
 }
 
-// // Global state hook for loading
-// const [loading, setLoading ] = useState(false)
-
 // Component for displaying loading icon
-const Loader = (loadingState) => {
-  return(
-   <p>loading...</p> 
-  )
+const Loader = loadingState => {
+  return <p>loading...</p>
 }
 
 // Function to create list items for measurements and ingredients
@@ -152,8 +146,8 @@ export const CocktailSearch = () => {
   // State variable for whether something has been searched
   const [searched, setSearched] = useState(false)
 
-  // State hook for Loading 
-  const [loading, setLoading ] = useState(false)
+  // State hook for Loading
+  const [loading, setLoading] = useState(false)
 
   // Handle text input on search
   const inputHandler = e => {
@@ -184,7 +178,6 @@ export const CocktailSearch = () => {
   useEffect(() => {
     // parameter that contains search query
     const searchParam = 'search.php?s='
-
 
     // If isMount not true, then it is not first render and can fetch API data
     if (!isMount) {
@@ -231,19 +224,29 @@ export const CocktailSearch = () => {
 
   // If first time searching, display below form
   if (searched === false) {
-    return <>{searchForm()}</>
+    return (
+      <>
+        <ClipLoader loading={loading} color={color} />
+        {searchForm()}
+      </>
+    )
   }
 
   // Error If something has been searched and no drink found, display the below
   if (searched === true && apiInfo.drinks === null) {
-    return <>{searchForm(true)}</>
+    return (
+      <>
+        <ClipLoader loading={loading} color={color} />
+        {searchForm(true)}
+      </>
+    )
   }
   // Otherwise, return regular form and drinks details
   return (
     <>
-    {/* {loading ?   <Loader loadingState={loading}/> : null } */}
-      <BarLoader loading={loading}  color={color}/>
-    
+      {/* {loading ?   <Loader loadingState={loading}/> : null } */}
+      <ClipLoader loading={loading} color={color} />
+
       {apiInfo && <>{cocktailItem(apiInfo)}</>}
 
       {apiInfo && similarItems(apiInfo)}
@@ -259,9 +262,11 @@ export const RandomCocktail = () => {
   // initiate isMount
   const isMount = useIsMount()
 
+  // State hook for loading
+  const [loading, setLoading] = useState(false)
+
   /* useEffect hook to dictate loading of the API when page loads
   and when randomise button is clicked */
-
   useEffect(() => {
     // const url = `https://www.thecocktaildb.com/api/json/v2/${process.env.API_KEY}/random.php`
     const searchParam = `random.php`
@@ -280,13 +285,17 @@ export const RandomCocktail = () => {
       }
 
       fetchData()
-    } else if (!randomApi) {
+    }
+    // Else if not load and randomApi is blank from click event, get a new random drink
+    else if (!randomApi) {
+      setLoading(true)
       const fetchData = async () => {
         const url = `.netlify/functions/get-data?param=${searchParam}`
 
         try {
           const response = await fetch(url).then(res => res.json())
           setRandomApi(response)
+          setLoading(false)
         } catch (error) {
           console.log('error', error)
         }
@@ -297,6 +306,7 @@ export const RandomCocktail = () => {
 
   return (
     <>
+      <ClipLoader loading={loading} color={color} />
       <h3>{randomApi && randomApi.drinks[0].strDrink}</h3>
 
       <span className="image main">
@@ -339,7 +349,11 @@ export const CategorySearch = () => {
   // State hook for holding ID of 'View Cocktail' item
   const [cocktailID, setCocktailID] = useState()
 
+  // State to reset cocktail list to hide
   const [reset, setReset] = useState(false)
+
+  // State for loading status
+  const [loading, setLoading] = useState(false)
 
   // useEffect hook for retrieving list of all cocktails from API
   useEffect(() => {
@@ -367,12 +381,15 @@ export const CategorySearch = () => {
     const searchParam = `filter.php?c=`
     const url = `.netlify/functions/get-data?param=${searchParam}&id=${selectedCategory}`
     // If isMount false, then it is not first render and can fetch API data
+
     if (!isMount) {
+      setLoading(true)
       const fetchData = async () => {
         try {
           const response = await fetch(url).then(res => res.json())
           // Set state to array of the json drinks list
           setCocktailList(oldData => [response.drinks])
+          setLoading(false)
         } catch (error) {
           console.log('error', error)
         }
@@ -487,7 +504,7 @@ export const CategorySearch = () => {
         </option>
         {categories.length > 0 && displayCategories(categories)}
       </select>
-
+      <ClipLoader loading={loading} color={color} />
       <ul className="ingredient-list">
         {cocktailList.length > 0 && displayCocktailList(cocktailList)}
       </ul>
@@ -506,15 +523,14 @@ export const IngredientSearch = () => {
   // State variable for holding submitted cocktail name
   const [searchTerm, setSearchTerm] = useState('')
 
-  // State variable for holding retrieved API info
-  const [apiInfo, setApiInfo] = useState()
-
-  // State variable for whether something has been searched
-  const [searched, setSearched] = useState(false)
-
+  // state hook for selected ingredient value
   const [selectedIngredient, setSelectedIngredient] = useState()
 
+  // state hook for selected ingredient API result
   const [ingredient, setIngredient] = useState([])
+
+  // State hook for loading
+  const [loading, setLoading] = useState(false)
 
   // Array holding common ingredients
   const commonIngredients = [
@@ -589,10 +605,12 @@ export const IngredientSearch = () => {
     // If isMount false, then it is not first render and can fetch API data
     if (!isMount) {
       const fetchData = async () => {
+        setLoading(true)
         try {
           const response = await fetch(url).then(res => res.json())
           // Set state to array of the json drinks list
           setIngredient(oldData => [response.drinks])
+          setLoading(false)
         } catch (error) {
           console.log('error', error)
         }
@@ -619,6 +637,7 @@ export const IngredientSearch = () => {
   // Otherwise, return regular form and drinks details
   return (
     <>
+      <ClipLoader loading={loading} color={color} />
       {commonIngredientList()}
       <ul className="ingredient-list">
         {ingredient.length > 0 && displayCocktailList(ingredient)}
