@@ -8,11 +8,13 @@ Having taken up cocktail making as a lockdown hobby, I was finding it difficult 
 
 Because I'd often be using the web-app via a mobile browser, a responsive design was of paramount importance. I stumbled upon the [Dimension Template](https://html5up.net/) by HTML5, which has great responsive design out of the box and I therefore chose to use it as a template and adapted it to be fit for purpose for Cocktail Hub.
 
-I chose Gatsby as my sub-framework of choice, partly out of familiarity, but mostly because of the ability to use the site as a Progressive Web Application for ease of use on my smartphone. It also helps that GatsbyJS has fantastic plugin support should I need it in the future.
+I chose Gatsby as my sub-framework of choice, partly out of familiarity, but mostly because of the ability to use the site as a Progressive Web Application for ease of use on my smartphone by installing it as a PWA app. It also helps that GatsbyJS has fantastic plugin support should I need it in the future.
+
+A second 'testing' branch exists in order for me to develop and test new features before merging into the 'master' branch in order to minimise any disruption to the live site.
 
 ## Deployment
 
-To deploy Cocktail Hub, I decided to use [Netlify](https://www.netlify.com/) due to the ease of deployment.
+To deploy Cocktail Hub, I decided to use [Netlify](https://www.netlify.com/) for a number of reasons. Firstly, Netlify allows for easy deployment of GatsbyJS web-apps which allows me to spend more time improving rhe codebase. Secondly, having purchased an upgraded API key to enhance the Cocktail Hub's functionality, [Netlify's Functions](https://www.netlify.com/products/functions/) allows me to easily deploy server-side code to serve as a proxy for requests made to the CocktailDB's API with my secret key.
 
 ## Getting started
 
