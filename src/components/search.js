@@ -490,14 +490,21 @@ export const IngredientSearch = () => {
   // State variable for whether something has been searched
   const [searched, setSearched] = useState(false)
 
+  const [selectedIngredient, setSelectedIngredient] = useState()
+
+  const [ingredient, setIngredient] = useState([])
+
   // Array holding common ingredients
   const commonIngredients = [
     'Gin',
     'Whiskey',
+    'Bourbon',
+    'Scotch',
     'Vodka',
     'Rum',
     'Tequila',
     'Brandy',
+    'Blended Whiskey',
   ]
 
   const inputHandler = e => {
@@ -517,19 +524,28 @@ export const IngredientSearch = () => {
     return (
       <>
         <label for="ingredient-category-select">
-          Select from popular categories:
+          Select from popular Ingredients:
         </label>
-        <select name="categories" id="category-select">
+        <select
+          name="ingredients"
+          id="ingredient-select"
+          onChange={e => handleSelectChange(e)}
+        >
           <option value="" disabled selected>
             {' '}
             - Please select an option -{' '}
           </option>
-          {commonIngredients.map(ingredient => (
-            <option value={ingredient}>{ingredient}</option>
+          {commonIngredients.map(ing => (
+            <option value={ing}>{ing}</option>
           ))}
         </select>
       </>
     )
+  }
+
+  const handleSelectChange = e => {
+    setSelectedIngredient(e.target.value)
+    console.log(selectedIngredient)
   }
   // Function to contain form
   const searchForm = error => {
@@ -543,57 +559,48 @@ export const IngredientSearch = () => {
       </form>
     )
   }
-  useEffect(() => {
-    // TODO: prevent useEffect from occuring on first render
-    const url = `https://www.thecocktaildb.com/api/json/v1/1/filter.php?i=${searchTerm}`
 
-    // If isMount not true, then it is not first render and can fetch API data
+  // useEffect hook to fetch API data for all cocktails for our selected ingredient
+  useEffect(() => {
+    const searchParam = `filter.php?i=`
+    const url = `.netlify/functions/get-data?param=${searchParam}&id=${selectedIngredient}`
+    // If isMount false, then it is not first render and can fetch API data
     if (!isMount) {
       const fetchData = async () => {
         try {
-          const response = await fetch(url)
-          const json = await response.json()
-          setApiInfo(json)
-          setSearched(true)
+          const response = await fetch(url).then(res => res.json())
+          // Set state to array of the json drinks list
+          setIngredient(oldData => [response.drinks])
         } catch (error) {
           console.log('error', error)
         }
       }
 
       fetchData()
-    } else {
-      return null
     }
-  }, [searchTerm])
+  }, [selectedIngredient])
 
-  // Function used to display cocktails with simmiliar name if more than 1
-  const similarItems = api => {
-    const data = api.drinks
-    if (data.length > 1) {
-      return (
-        <>
-          <h4>View similar items</h4>
-          <ul>
-            {data.map(item => (
-              <li>
-                <a onClick={() => setSearchTerm(item.strDrink)}>
-                  {item.strDrink}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </>
-      )
-    }
+  const displayCocktailList = api => {
+    return (
+      <>
+        {api[0].map((cata, index) => (
+          <li key={cata.idDrink}>
+            <h4>{cata.strDrink}</h4>
+
+            <img src={cata.strDrinkThumb} height="125px" width="125px"></img>
+          </li>
+        ))}
+      </>
+    )
   }
 
   // Otherwise, return regular form and drinks details
   return (
     <>
-      {apiInfo && similarItems(apiInfo)}
-      {searchForm()}
-
       {commonIngredientList()}
+      <ul className="ingredient-list">
+        {ingredient.length > 0 && displayCocktailList(ingredient)}
+      </ul>
     </>
   )
 }
