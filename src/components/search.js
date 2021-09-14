@@ -1,5 +1,6 @@
-import React, { useRef, useState, useEffect } from 'react'
-import { css } from '@emotion/react'
+import { CONDITIONAL_TYPES } from '@babel/types'
+import React, { useRef, useState, useEffect, isValidElement } from 'react'
+import Creatable from 'react-select/creatable'
 import ClipLoader from 'react-spinners/ClipLoader'
 
 const color = '#ffffff'
@@ -514,17 +515,16 @@ export const CategorySearch = () => {
 
 // Search by ingredient component
 export const IngredientSearch = () => {
+  // TODO: - homogenise react-select CSS styling
+
   // initiate misMount
   const isMount = useIsMount()
 
-  // State variable for handling text input
-  const [input, setInput] = useState('')
-
-  // State variable for holding submitted cocktail name
-  const [searchTerm, setSearchTerm] = useState('')
-
   // state hook for selected ingredient value
-  const [selectedIngredient, setSelectedIngredient] = useState()
+  const [selectedIngredient, setSelectedIngredient] = useState('')
+
+  // State hook for ingredient array
+  const [ingredientArray, setIngredientArray] = useState([])
 
   // state hook for selected ingredient API result
   const [ingredient, setIngredient] = useState([])
@@ -534,75 +534,43 @@ export const IngredientSearch = () => {
 
   // Array holding common ingredients
   const commonIngredients = [
-    'Gin',
-    'Whiskey',
-    'Bourbon',
-    'Scotch',
-    'Vodka',
-    'Rum',
-    'Tequila',
-    'Brandy',
-    'Blended Whiskey',
+    { value: 'Gin', label: 'Gin' },
+    { value: 'Whiskey', label: 'Whiskey' },
+    { value: 'Bourbon', label: 'Bourbon' },
+    { value: 'Scotch', label: 'Scotch' },
+    { value: 'Vodka', label: 'Vodka' },
+    { value: 'Rum', label: 'Rum' },
+    { value: 'Tequila', label: 'Tequila' },
+    { value: 'Brandy', label: 'Brandy' },
+    { value: 'Blended Whiskey', label: 'Blended Whiskey' },
   ]
 
-  const inputHandler = e => {
-    const value = e.target.value
-
-    setInput(value)
-  }
-
-  const handleSubmit = e => {
-    e.preventDefault()
-
-    const value = input
-    setSearchTerm(value)
-  }
-
-  const commonIngredientList = () => {
-    return (
-      <>
-        <label for="ingredient-category-select">
-          Select from popular Ingredients:
-        </label>
-        <select
-          name="ingredients"
-          id="ingredient-select"
-          onChange={e => handleSelectChange(e)}
-        >
-          <option value="" disabled selected>
-            {' '}
-            - Please select an option -{' '}
-          </option>
-          {commonIngredients.map(ing => (
-            <option value={ing}>{ing}</option>
-          ))}
-        </select>
-      </>
-    )
-  }
-
   const handleSelectChange = e => {
-    setSelectedIngredient(e.target.value)
-    console.log(selectedIngredient)
+    // Empty array to hold all selected values
+    const allItems = []
+
+    // Map through selected values and add to array
+    e.map(ing => {
+      allItems.push(ing.value)
+    })
+
+    // Set ingredientArray to a stringified version of the allItems array
+    setIngredientArray(allItems.join())
   }
-  // Function to contain form
-  const searchForm = error => {
-    return (
-      <form>
-        <label>Search:</label>
-        <input type="text" onChange={inputHandler}></input>
-        <button onClick={handleSubmit}>Submit</button>
-        {/* If error is true, display error msg */}
-        {error && <p>Could not find cocktail. Please search again</p>}
-      </form>
-    )
-  }
+
+  // useEffect hook to set selectedIngredient state hook when ingredient array is updated
+  useEffect(() => {
+    if (!isMount) {
+      setSelectedIngredient(ingredientArray)
+    }
+  }, [ingredientArray])
 
   // useEffect hook to fetch API data for all cocktails for our selected ingredient
   useEffect(() => {
     const searchParam = `filter.php?i=`
-    const url = `.netlify/functions/get-data?param=${searchParam}&id=${selectedIngredient}`
     // If isMount false, then it is not first render and can fetch API data
+    const url = `.netlify/functions/get-data?param=${searchParam}&id=${selectedIngredient}`
+
     if (!isMount) {
       const fetchData = async () => {
         setLoading(true)
@@ -621,24 +589,35 @@ export const IngredientSearch = () => {
   }, [selectedIngredient])
 
   const displayCocktailList = api => {
-    return (
-      <>
-        {api[0].map((cata, index) => (
-          <li key={cata.idDrink}>
-            <h4>{cata.strDrink}</h4>
+    if (api[0] === 'None Found') {
+      return <p>No cocktails containing {selectedIngredient} found</p>
+    } else if (api !== 'None found') {
+      return (
+        <>
+          {api[0].map((cata, index) => (
+            <li key={cata.idDrink}>
+              <h4>{cata.strDrink}</h4>
 
-            <img src={cata.strDrinkThumb} height="125px" width="125px"></img>
-          </li>
-        ))}
-      </>
-    )
+              <img src={cata.strDrinkThumb} height="125px" width="125px"></img>
+            </li>
+          ))}
+        </>
+      )
+    }
   }
 
   // Otherwise, return regular form and drinks details
   return (
     <>
       <ClipLoader loading={loading} color={color} />
-      {commonIngredientList()}
+      <Creatable
+        className="ingredient-select"
+        onChange={e => handleSelectChange(e)}
+        isMulti
+        options={commonIngredients}
+      />
+      {/* If selected ingredient is true, show what has been searched for */}
+      {selectedIngredient && <p>You've searched for {selectedIngredient}</p>}
       <ul className="ingredient-list">
         {ingredient.length > 0 && displayCocktailList(ingredient)}
       </ul>
