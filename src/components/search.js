@@ -1,5 +1,9 @@
-import React, { useRef, useState, useEffect } from 'react'
+import { CONDITIONAL_TYPES } from '@babel/types'
+import React, { useRef, useState, useEffect, isValidElement } from 'react'
+import Creatable from 'react-select/creatable'
+import ClipLoader from 'react-spinners/ClipLoader'
 
+const color = '#ffffff'
 // Custom hook to indicate whether current render is first render
 const useIsMount = () => {
   const isMountRef = useRef(true)
@@ -7,6 +11,11 @@ const useIsMount = () => {
     isMountRef.current = false
   }, [])
   return isMountRef.current
+}
+
+// Component for displaying loading icon
+const Loader = loadingState => {
+  return <p>loading...</p>
 }
 
 // Function to create list items for measurements and ingredients
@@ -138,6 +147,9 @@ export const CocktailSearch = () => {
   // State variable for whether something has been searched
   const [searched, setSearched] = useState(false)
 
+  // State hook for Loading
+  const [loading, setLoading] = useState(false)
+
   // Handle text input on search
   const inputHandler = e => {
     const value = e.target.value
@@ -148,7 +160,6 @@ export const CocktailSearch = () => {
   // Handle submitted search value
   const handleSubmit = e => {
     e.preventDefault()
-
     const value = input
     setSearchTerm(value)
   }
@@ -161,7 +172,11 @@ export const CocktailSearch = () => {
         <input type="text" onChange={inputHandler}></input>
         <button onClick={handleSubmit}>Submit</button>
         {/* If error is true, display error msg */}
-        {error && <p>Could not find cocktail. Please search again</p>}
+        {error && (
+          <p className="error-message">
+            Could not find cocktail. Please search again.
+          </p>
+        )}
       </form>
     )
   }
@@ -173,11 +188,13 @@ export const CocktailSearch = () => {
     if (!isMount) {
       const fetchData = async () => {
         const url = `.netlify/functions/get-data?param=${searchParam}&id=${searchTerm}`
+        setLoading(true)
 
         try {
           const response = await fetch(url).then(res => res.json())
           setApiInfo(response)
           setSearched(true)
+          setLoading(false)
         } catch (error) {
           console.log('error', error)
         }
@@ -212,16 +229,29 @@ export const CocktailSearch = () => {
 
   // If first time searching, display below form
   if (searched === false) {
-    return <>{searchForm()}</>
+    return (
+      <>
+        <ClipLoader loading={loading} color={color} />
+        {searchForm()}
+      </>
+    )
   }
 
   // Error If something has been searched and no drink found, display the below
   if (searched === true && apiInfo.drinks === null) {
-    return <>{searchForm(true)}</>
+    return (
+      <>
+        <ClipLoader loading={loading} color={color} />
+        {searchForm(true)}
+      </>
+    )
   }
   // Otherwise, return regular form and drinks details
   return (
     <>
+      {/* {loading ?   <Loader loadingState={loading}/> : null } */}
+      <ClipLoader loading={loading} color={color} />
+
       {apiInfo && <>{cocktailItem(apiInfo)}</>}
 
       {apiInfo && similarItems(apiInfo)}
@@ -237,9 +267,11 @@ export const RandomCocktail = () => {
   // initiate isMount
   const isMount = useIsMount()
 
+  // State hook for loading
+  const [loading, setLoading] = useState(false)
+
   /* useEffect hook to dictate loading of the API when page loads
   and when randomise button is clicked */
-
   useEffect(() => {
     // const url = `https://www.thecocktaildb.com/api/json/v2/${process.env.API_KEY}/random.php`
     const searchParam = `random.php`
@@ -258,13 +290,17 @@ export const RandomCocktail = () => {
       }
 
       fetchData()
-    } else if (!randomApi) {
+    }
+    // Else if not load and randomApi is blank from click event, get a new random drink
+    else if (!randomApi) {
+      setLoading(true)
       const fetchData = async () => {
         const url = `.netlify/functions/get-data?param=${searchParam}`
 
         try {
           const response = await fetch(url).then(res => res.json())
           setRandomApi(response)
+          setLoading(false)
         } catch (error) {
           console.log('error', error)
         }
@@ -275,6 +311,7 @@ export const RandomCocktail = () => {
 
   return (
     <>
+      <ClipLoader loading={loading} color={color} />
       <h3>{randomApi && randomApi.drinks[0].strDrink}</h3>
 
       <span className="image main">
@@ -317,7 +354,11 @@ export const CategorySearch = () => {
   // State hook for holding ID of 'View Cocktail' item
   const [cocktailID, setCocktailID] = useState()
 
+  // State to reset cocktail list to hide
   const [reset, setReset] = useState(false)
+
+  // State for loading status
+  const [loading, setLoading] = useState(false)
 
   // useEffect hook for retrieving list of all cocktails from API
   useEffect(() => {
@@ -345,12 +386,15 @@ export const CategorySearch = () => {
     const searchParam = `filter.php?c=`
     const url = `.netlify/functions/get-data?param=${searchParam}&id=${selectedCategory}`
     // If isMount false, then it is not first render and can fetch API data
+
     if (!isMount) {
+      setLoading(true)
       const fetchData = async () => {
         try {
           const response = await fetch(url).then(res => res.json())
           // Set state to array of the json drinks list
           setCocktailList(oldData => [response.drinks])
+          setLoading(false)
         } catch (error) {
           console.log('error', error)
         }
@@ -421,6 +465,13 @@ export const CategorySearch = () => {
             <h4>{cata.strDrink}</h4>
 
             <img src={cata.strDrinkThumb} height="125px" width="125px"></img>
+            {/* Only show selected cocktail if CocktailID is true */}
+            {cocktailID && (
+              <div className="view-cocktail">
+                {cata.idDrink === cocktailID.drinks[0].idDrink &&
+                  cocktailItem(cocktailID)}
+              </div>
+            )}
             {/* If cocktail ID is not undefined and therefore has been set for viewing
             show the hide button, else show the vew button */}
             {cocktailID !== undefined ? (
@@ -437,13 +488,6 @@ export const CategorySearch = () => {
               <button id={cata.idDrink} onClick={e => handleButton(e)}>
                 View
               </button>
-            )}
-            {/* Only show selected cocktail if CocktailID is true */}
-            {cocktailID && (
-              <div className="view-cocktail">
-                {cata.idDrink === cocktailID.drinks[0].idDrink &&
-                  cocktailItem(cocktailID)}
-              </div>
             )}
           </li>
         ))}
@@ -465,9 +509,197 @@ export const CategorySearch = () => {
         </option>
         {categories.length > 0 && displayCategories(categories)}
       </select>
-
+      <ClipLoader loading={loading} color={color} />
       <ul className="ingredient-list">
         {cocktailList.length > 0 && displayCocktailList(cocktailList)}
+      </ul>
+    </>
+  )
+}
+
+// Search by ingredient component
+export const IngredientSearch = () => {
+  // TODO: - homogenise react-select CSS styling
+
+  // initiate misMount
+  const isMount = useIsMount()
+
+  // state hook for selected ingredient value
+  const [selectedIngredient, setSelectedIngredient] = useState('')
+
+  // State hook for ingredient array
+  const [ingredientArray, setIngredientArray] = useState([])
+
+  // state hook for selected ingredient API result
+  const [ingredient, setIngredient] = useState([])
+
+  // State hook for loading
+  const [loading, setLoading] = useState(false)
+
+  // State hook for holding value of clicked cocktail button ID to avoid infinite loop
+  const [selectedCocktailID, setSelectedCocktailID] = useState()
+
+  // State hook for cocktail ID
+  const [cocktailID, setCocktailID] = useState()
+
+  // State hook for handling reset on 'hide' button click
+  const [reset, setReset] = useState(false)
+
+  // Array holding common ingredients
+  const commonIngredients = [
+    { value: 'Gin', label: 'Gin' },
+    { value: 'Whiskey', label: 'Whiskey' },
+    { value: 'Bourbon', label: 'Bourbon' },
+    { value: 'Scotch', label: 'Scotch' },
+    { value: 'Vodka', label: 'Vodka' },
+    { value: 'Rum', label: 'Rum' },
+    { value: 'Tequila', label: 'Tequila' },
+    { value: 'Brandy', label: 'Brandy' },
+    { value: 'Blended Whiskey', label: 'Blended Whiskey' },
+  ]
+
+  const handleSelectChange = e => {
+    // Empty array to hold all selected values
+    const allItems = []
+
+    // Map through selected values and add to array
+    e.map(ing => {
+      allItems.push(ing.value)
+    })
+
+    // Set ingredientArray to a stringified version of the allItems array
+    setIngredientArray(allItems.join())
+  }
+
+  // useEffect hook to set selectedIngredient state hook when ingredient array is updated
+  useEffect(() => {
+    if (!isMount) {
+      setSelectedIngredient(ingredientArray)
+    }
+  }, [ingredientArray])
+
+  // useEffect hook to fetch API data for all cocktails for our selected ingredient
+  useEffect(() => {
+    const searchParam = `filter.php?i=`
+    // If isMount false, then it is not first render and can fetch API data
+    const url = `.netlify/functions/get-data?param=${searchParam}&id=${selectedIngredient}`
+
+    if (!isMount) {
+      const fetchData = async () => {
+        setLoading(true)
+        try {
+          const response = await fetch(url).then(res => res.json())
+          // Set state to array of the json drinks list
+          setIngredient(oldData => [response.drinks])
+          setLoading(false)
+        } catch (error) {
+          console.log('error', error)
+        }
+      }
+
+      fetchData()
+    }
+  }, [selectedIngredient])
+
+  // useEffect hook for handling fetching data of selected cocktails
+  useEffect(() => {
+    const searchParam = `lookup.php?i=`
+
+    /*If reset is true, return null to avoid fetching an invalid API due to cocktailID being false,
+      otherwise if isMount not true, then it is not first render and can fetch API data
+      */
+    if (reset) {
+      return null
+    } else if (!isMount) {
+      const url = `.netlify/functions/get-data?param=${searchParam}&id=${selectedCocktailID}`
+
+      const fetchData = async () => {
+        try {
+          const response = await fetch(url).then(res => res.json())
+          setCocktailID(response)
+        } catch (error) {
+          console.log('error', error)
+        }
+      }
+
+      fetchData()
+    } else {
+      return null
+    }
+  }, [selectedCocktailID])
+
+  // Handle's the 'view' button and ensures reset is false. Sets cocktail ID to target id
+  const handleButton = e => {
+    setSelectedCocktailID(e.target.id)
+    setReset(false)
+  }
+
+  // Function to hide cocktail and sets cocktailID to be blank
+  const handleHide = e => {
+    setCocktailID()
+    setSelectedCocktailID()
+    setReset(true)
+  }
+
+  const displayCocktailList = api => {
+    if (api[0] === 'None Found') {
+      return (
+        <p className="error-message">
+          No cocktails containing {selectedIngredient.replace(/,/g, ' & ')} were
+          found.
+        </p>
+      )
+    } else if (api !== 'None found') {
+      return (
+        <>
+          {api[0].map((cata, index) => (
+            <li key={cata.idDrink}>
+              <h4>{cata.strDrink}</h4>
+
+              <img src={cata.strDrinkThumb} height="125px" width="125px"></img>
+
+              {cocktailID && (
+                <div className="view-cocktail">
+                  {cata.idDrink === cocktailID.drinks[0].idDrink &&
+                    cocktailItem(cocktailID)}
+                </div>
+              )}
+              {cocktailID !== undefined ? (
+                cata.idDrink === cocktailID.drinks[0].idDrink ? (
+                  <button id={cata.idDrink} onClick={e => handleHide(e)}>
+                    Hide
+                  </button>
+                ) : (
+                  <button id={cata.idDrink} onClick={e => handleButton(e)}>
+                    View
+                  </button>
+                )
+              ) : (
+                <button id={cata.idDrink} onClick={e => handleButton(e)}>
+                  View
+                </button>
+              )}
+            </li>
+          ))}
+        </>
+      )
+    }
+  }
+  const color = 'rgba(27, 31, 34, 0.85)'
+  // Otherwise, return regular form and drinks details
+  return (
+    <>
+      <ClipLoader loading={loading} color={color} />
+      <label>Select your ingredients</label>
+      <Creatable
+        className="ingredient-select"
+        onChange={e => handleSelectChange(e)}
+        isMulti
+        options={commonIngredients}
+      />
+
+      <ul className="ingredient-list">
+        {ingredient.length > 0 && displayCocktailList(ingredient)}
       </ul>
     </>
   )
