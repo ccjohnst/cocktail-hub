@@ -69,7 +69,12 @@ class Main extends React.Component {
           } ${this.props.articleTimeout ? 'timeout' : ''}`}
           style={{ display: 'none' }}
         >
-          <h2 className="major">Find by Ingredient</h2>
+          <h2 className="major">Find by Ingredients</h2>
+          <p>
+            Search cocktails either by selecting from popular ingredients, or
+            input ingredients that you wish to search for. Add multiple filters
+            to make your search more specific.{' '}
+          </p>
           <IngredientSearch />
           {close}
         </article>

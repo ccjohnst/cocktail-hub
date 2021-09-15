@@ -461,6 +461,13 @@ export const CategorySearch = () => {
             <h4>{cata.strDrink}</h4>
 
             <img src={cata.strDrinkThumb} height="125px" width="125px"></img>
+            {/* Only show selected cocktail if CocktailID is true */}
+            {cocktailID && (
+              <div className="view-cocktail">
+                {cata.idDrink === cocktailID.drinks[0].idDrink &&
+                  cocktailItem(cocktailID)}
+              </div>
+            )}
             {/* If cocktail ID is not undefined and therefore has been set for viewing
             show the hide button, else show the vew button */}
             {cocktailID !== undefined ? (
@@ -477,13 +484,6 @@ export const CategorySearch = () => {
               <button id={cata.idDrink} onClick={e => handleButton(e)}>
                 View
               </button>
-            )}
-            {/* Only show selected cocktail if CocktailID is true */}
-            {cocktailID && (
-              <div className="view-cocktail">
-                {cata.idDrink === cocktailID.drinks[0].idDrink &&
-                  cocktailItem(cocktailID)}
-              </div>
             )}
           </li>
         ))}
@@ -531,6 +531,15 @@ export const IngredientSearch = () => {
 
   // State hook for loading
   const [loading, setLoading] = useState(false)
+
+  // State hook for holding value of clicked cocktail button ID to avoid infinite loop
+  const [selectedCocktailID, setSelectedCocktailID] = useState()
+
+  // State hook for cocktail ID
+  const [cocktailID, setCocktailID] = useState()
+
+  // State hook for handling reset on 'hide' button click
+  const [reset, setReset] = useState(false)
 
   // Array holding common ingredients
   const commonIngredients = [
@@ -588,6 +597,46 @@ export const IngredientSearch = () => {
     }
   }, [selectedIngredient])
 
+  // useEffect hook for handling fetching data of selected cocktails
+  useEffect(() => {
+    const searchParam = `lookup.php?i=`
+
+    /*If reset is true, return null to avoid fetching an invalid API due to cocktailID being false,
+      otherwise if isMount not true, then it is not first render and can fetch API data
+      */
+    if (reset) {
+      return null
+    } else if (!isMount) {
+      const url = `.netlify/functions/get-data?param=${searchParam}&id=${selectedCocktailID}`
+
+      const fetchData = async () => {
+        try {
+          const response = await fetch(url).then(res => res.json())
+          setCocktailID(response)
+        } catch (error) {
+          console.log('error', error)
+        }
+      }
+
+      fetchData()
+    } else {
+      return null
+    }
+  }, [selectedCocktailID])
+
+  // Handle's the 'view' button and ensures reset is false. Sets cocktail ID to target id
+  const handleButton = e => {
+    setSelectedCocktailID(e.target.id)
+    setReset(false)
+  }
+
+  // Function to hide cocktail and sets cocktailID to be blank
+  const handleHide = e => {
+    setCocktailID()
+    setSelectedCocktailID()
+    setReset(true)
+  }
+
   const displayCocktailList = api => {
     if (api[0] === 'None Found') {
       return <p>No cocktails containing {selectedIngredient} found</p>
@@ -599,6 +648,28 @@ export const IngredientSearch = () => {
               <h4>{cata.strDrink}</h4>
 
               <img src={cata.strDrinkThumb} height="125px" width="125px"></img>
+
+              {cocktailID && (
+                <div className="view-cocktail">
+                  {cata.idDrink === cocktailID.drinks[0].idDrink &&
+                    cocktailItem(cocktailID)}
+                </div>
+              )}
+              {cocktailID !== undefined ? (
+                cata.idDrink === cocktailID.drinks[0].idDrink ? (
+                  <button id={cata.idDrink} onClick={e => handleHide(e)}>
+                    Hide
+                  </button>
+                ) : (
+                  <button id={cata.idDrink} onClick={e => handleButton(e)}>
+                    View
+                  </button>
+                )
+              ) : (
+                <button id={cata.idDrink} onClick={e => handleButton(e)}>
+                  View
+                </button>
+              )}
             </li>
           ))}
         </>
