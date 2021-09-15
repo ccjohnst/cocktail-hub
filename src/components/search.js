@@ -172,7 +172,11 @@ export const CocktailSearch = () => {
         <input type="text" onChange={inputHandler}></input>
         <button onClick={handleSubmit}>Submit</button>
         {/* If error is true, display error msg */}
-        {error && <p>Could not find cocktail. Please search again</p>}
+        {error && (
+          <p className="error-message">
+            Could not find cocktail. Please search again.
+          </p>
+        )}
       </form>
     )
   }
@@ -639,7 +643,12 @@ export const IngredientSearch = () => {
 
   const displayCocktailList = api => {
     if (api[0] === 'None Found') {
-      return <p>No cocktails containing {selectedIngredient} found</p>
+      return (
+        <p className="error-message">
+          No cocktails containing {selectedIngredient.replace(/,/g, ' & ')} were
+          found.
+        </p>
+      )
     } else if (api !== 'None found') {
       return (
         <>
@@ -676,19 +685,19 @@ export const IngredientSearch = () => {
       )
     }
   }
-
+  const color = 'rgba(27, 31, 34, 0.85)'
   // Otherwise, return regular form and drinks details
   return (
     <>
       <ClipLoader loading={loading} color={color} />
+      <label>Select your ingredients</label>
       <Creatable
         className="ingredient-select"
         onChange={e => handleSelectChange(e)}
         isMulti
         options={commonIngredients}
       />
-      {/* If selected ingredient is true, show what has been searched for */}
-      {selectedIngredient && <p>You've searched for {selectedIngredient}</p>}
+
       <ul className="ingredient-list">
         {ingredient.length > 0 && displayCocktailList(ingredient)}
       </ul>

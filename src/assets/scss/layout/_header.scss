@@ -124,6 +124,7 @@
       border-radius: _size(border-radius);
 
       li {
+        width: calc(25% - 0.25px);
         padding-left: 0;
         border-left: solid _size(border-width) _palette(border);
 
@@ -132,6 +133,7 @@
         }
 
         button {
+          width: 100%;
           display: block;
           min-width: 7.5rem;
           height: 2.75rem;
@@ -260,6 +262,7 @@
         max-width: 100%;
 
         li {
+          width: auto;
           border-left: 0;
           border-top: solid _size(border-width) _palette(border);
 

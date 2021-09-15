@@ -71,9 +71,8 @@ class Main extends React.Component {
         >
           <h2 className="major">Find by Ingredients</h2>
           <p>
-            Search cocktails either by selecting from popular ingredients, or
-            input ingredients that you wish to search for. Add multiple filters
-            to make your search more specific.{' '}
+            Select or input ingredients to find a cocktail. Add multiple
+            ingredients to make your search more specific.{' '}
           </p>
           <IngredientSearch />
           {close}

@@ -7,7 +7,7 @@ exports.handler = async function(event, context) {
 
   // Half a second timeout promise to avoid hitting API too hard
   const waitFor = delay => new Promise(resolve => setTimeout(resolve, delay))
-  await waitFor(500)
+  await waitFor(250)
 
   try {
     // Destructure param and id from the stringParameters
