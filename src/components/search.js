@@ -2,6 +2,9 @@ import { CONDITIONAL_TYPES } from '@babel/types'
 import React, { useRef, useState, useEffect, isValidElement } from 'react'
 import Creatable from 'react-select/creatable'
 import ClipLoader from 'react-spinners/ClipLoader'
+import { useReactToPrint } from 'react-to-print'
+import { RiPrinterLine } from '@react-icons/all-files/ri/RiPrinterLine'
+import { RiSave3Line } from '@react-icons/all-files/ri/RiSave3Line'
 
 const color = '#ffffff'
 // Custom hook to indicate whether current render is first render
@@ -11,11 +14,6 @@ const useIsMount = () => {
     isMountRef.current = false
   }, [])
   return isMountRef.current
-}
-
-// Component for displaying loading icon
-const Loader = loadingState => {
-  return <p>loading...</p>
 }
 
 // Function to create list items for measurements and ingredients
@@ -115,10 +113,16 @@ const ingredients = api => {
   )
 }
 
-// Function to display cocktail items passed to apiInfo param
-const cocktailItem = apiInfo => {
+// Component to display cocktail items passed to apiInfo param
+const CocktailItem = ({ apiInfo }) => {
+  // Refs to handle ReactToPrint
+  const componentRef = useRef()
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+  })
+
   return (
-    <>
+    <div className="cocktail" ref={componentRef}>
       <h3>{apiInfo.drinks[0].strDrink}</h3>
       <span className="image main">
         <img src={apiInfo.drinks[0].strDrinkThumb} alt="" />
@@ -127,7 +131,13 @@ const cocktailItem = apiInfo => {
       <p>{apiInfo.drinks[0].strInstructions}</p>
       <h4>Ingredients</h4>
       <ol>{ingredients(apiInfo.drinks[0])}</ol>
-    </>
+      <button className="action-buttons" onClick={handlePrint}>
+        <RiPrinterLine />
+      </button>
+      <button className="action-buttons">
+        <RiSave3Line />
+      </button>
+    </div>
   )
 }
 
@@ -156,6 +166,12 @@ export const CocktailSearch = () => {
 
     setInput(value)
   }
+
+  // Refs to handle ReactToPrint
+  const componentRef = useRef()
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+  })
 
   // Handle submitted search value
   const handleSubmit = e => {
@@ -211,7 +227,7 @@ export const CocktailSearch = () => {
     const data = api.drinks
     if (data.length > 1) {
       return (
-        <>
+        <div className="similiar-items">
           <h4>View similar items</h4>
           <ul>
             {data.map(item => (
@@ -222,7 +238,7 @@ export const CocktailSearch = () => {
               </li>
             ))}
           </ul>
-        </>
+        </div>
       )
     }
   }
@@ -248,15 +264,14 @@ export const CocktailSearch = () => {
   }
   // Otherwise, return regular form and drinks details
   return (
-    <>
-      {/* {loading ?   <Loader loadingState={loading}/> : null } */}
+    <div ref={componentRef}>
       <ClipLoader loading={loading} color={color} />
 
-      {apiInfo && <>{cocktailItem(apiInfo)}</>}
+      {apiInfo && <CocktailItem apiInfo={apiInfo} />}
 
       {apiInfo && similarItems(apiInfo)}
       {searchForm()}
-    </>
+    </div>
   )
 }
 
@@ -468,8 +483,9 @@ export const CategorySearch = () => {
             {/* Only show selected cocktail if CocktailID is true */}
             {cocktailID && (
               <div className="view-cocktail">
-                {cata.idDrink === cocktailID.drinks[0].idDrink &&
-                  cocktailItem(cocktailID)}
+                {cata.idDrink === cocktailID.drinks[0].idDrink && (
+                  <CocktailItem apiInfo={cocktailID} />
+                )}
               </div>
             )}
             {/* If cocktail ID is not undefined and therefore has been set for viewing
@@ -660,8 +676,9 @@ export const IngredientSearch = () => {
 
               {cocktailID && (
                 <div className="view-cocktail">
-                  {cata.idDrink === cocktailID.drinks[0].idDrink &&
-                    cocktailItem(cocktailID)}
+                  {cata.idDrink === cocktailID.drinks[0].idDrink && (
+                    <CocktailItem apiInfo={cocktailID} />
+                  )}
                 </div>
               )}
               {cocktailID !== undefined ? (
@@ -685,7 +702,7 @@ export const IngredientSearch = () => {
       )
     }
   }
-  const color = 'rgba(27, 31, 34, 0.85)'
+
   // Otherwise, return regular form and drinks details
   return (
     <>
