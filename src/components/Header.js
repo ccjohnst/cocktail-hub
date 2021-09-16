@@ -61,7 +61,7 @@ const Header = props => (
               props.onOpenArticle('rep-ingredients')
             }}
           >
-            ingredients
+            Ingredients
           </button>
         </li>
       </ul>
