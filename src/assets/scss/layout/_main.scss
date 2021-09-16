@@ -74,12 +74,15 @@
 
     grid-column-start: 1;
     grid-column-end: -1;
-    ol {
-      list-style: decimal;
-    }
-    li {
+
+    .ingredient-list-items {
       display: block;
-      border: none;
+    }
+    ol {
+      li {
+        border: none;
+        display: list-item;
+      }
     }
   }
 

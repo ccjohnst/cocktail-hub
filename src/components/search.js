@@ -19,7 +19,7 @@ const useIsMount = () => {
 // Function to create list items for measurements and ingredients
 const ingredients = api => {
   return (
-    <>
+    <ol className="ingredient-list-items">
       {api.strIngredient1 && (
         <li>
           {' '}
@@ -109,7 +109,7 @@ const ingredients = api => {
           {api.strMeasure15} {api.strIngredient15}
         </li>
       )}
-    </>
+    </ol>
   )
 }
 
@@ -130,7 +130,7 @@ const CocktailItem = ({ apiInfo }) => {
       <h4>Instructions</h4>
       <p>{apiInfo.drinks[0].strInstructions}</p>
       <h4>Ingredients</h4>
-      <ol>{ingredients(apiInfo.drinks[0])}</ol>
+      {ingredients(apiInfo.drinks[0])}
       <button className="action-buttons" onClick={handlePrint}>
         <RiPrinterLine />
       </button>
@@ -526,9 +526,9 @@ export const CategorySearch = () => {
         {categories.length > 0 && displayCategories(categories)}
       </select>
       <ClipLoader loading={loading} color={color} />
-      <ul className="ingredient-list">
+      <div className="ingredient-list">
         {cocktailList.length > 0 && displayCocktailList(cocktailList)}
-      </ul>
+      </div>
     </>
   )
 }
