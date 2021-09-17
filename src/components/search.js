@@ -1,11 +1,21 @@
 import { CONDITIONAL_TYPES } from '@babel/types'
-import React, { useRef, useState, useEffect, isValidElement } from 'react'
+import React, {
+  useRef,
+  useState,
+  useEffect,
+  isValidElement,
+  createContext,
+  useContext,
+} from 'react'
+
 import Creatable from 'react-select/creatable'
 import ClipLoader from 'react-spinners/ClipLoader'
+
 import { useReactToPrint } from 'react-to-print'
 import { RiPrinterLine } from '@react-icons/all-files/ri/RiPrinterLine'
 import { RiSave3Line } from '@react-icons/all-files/ri/RiSave3Line'
 
+import { Context } from '../components/global/Store'
 const color = '#ffffff'
 // Custom hook to indicate whether current render is first render
 const useIsMount = () => {
@@ -113,13 +123,35 @@ const ingredients = api => {
   )
 }
 
+// Component to display saved Cocktail
+const SavedCocktails = () => {
+  // Import the context and provide to UseContext hook as an argument
+  const [state, dispatch] = useContext(Context)
+
+  return <>{state.ids.length > 0 && state.ids.map(ele => <p>{ele}</p>)}</>
+}
+
+// Component to display saved Cocktail list
+
 // Component to display cocktail items passed to apiInfo param
 const CocktailItem = ({ apiInfo }) => {
+  const [state, dispatch] = useContext(Context)
+
   // Refs to handle ReactToPrint
   const componentRef = useRef()
   const handlePrint = useReactToPrint({
     content: () => componentRef.current,
   })
+
+  // function to handle save icon
+  const handleSave = e => {
+    console.log(e)
+    localStorage.setItem('id', e.target.id)
+    dispatch({
+      type: 'ADD_ID',
+      payload: e.target.id,
+    })
+  }
 
   return (
     <div className="cocktail" ref={componentRef}>
@@ -134,7 +166,12 @@ const CocktailItem = ({ apiInfo }) => {
       <button className="action-buttons" onClick={handlePrint}>
         <RiPrinterLine />
       </button>
-      <button className="action-buttons">
+      <button
+        id={apiInfo.drinks[0].idDrink}
+        className="action-buttons"
+        onClick={e => handleSave(e)}
+        data-name={apiInfo.drinks[0].strDrink}
+      >
         <RiSave3Line />
       </button>
     </div>
@@ -144,6 +181,8 @@ const CocktailItem = ({ apiInfo }) => {
 export const CocktailSearch = () => {
   // initiate misMount
   const isMount = useIsMount()
+
+  const [state, dispatch] = useContext(Context)
 
   // State variable for handling text input
   const [input, setInput] = useState('')
@@ -268,7 +307,7 @@ export const CocktailSearch = () => {
       <ClipLoader loading={loading} color={color} />
 
       {apiInfo && <CocktailItem apiInfo={apiInfo} />}
-
+      {state && <SavedCocktails />}
       {apiInfo && similarItems(apiInfo)}
       {searchForm()}
     </div>
