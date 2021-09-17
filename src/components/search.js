@@ -124,17 +124,85 @@ const ingredients = api => {
 }
 
 // Component to display saved Cocktail
-const SavedCocktails = () => {
+export const SavedCocktails = () => {
+  const isMount = useIsMount()
+
   // Import the context and provide to UseContext hook as an argument
   const [state, dispatch] = useContext(Context)
 
-  return <>{state.ids.length > 0 && state.ids.map(ele => <p>{ele}</p>)}</>
+  const [idData, setIdData] = useState()
+
+  const [retrievedData, setRetrievedData] = useState()
+
+  useEffect(() => {
+    // parameter that contains search query
+    const searchParam = 'search.php?s='
+
+    // If isMount not true, then it is not first render and can fetch API data
+    if (!isMount) {
+      const fetchData = async () => {
+        const url = `.netlify/functions/get-data?param=${searchParam}&id=${idData}`
+
+        try {
+          const response = await fetch(url).then(res => res.json())
+          setRetrievedData(response)
+        } catch (error) {
+          console.log('error', error)
+        }
+      }
+
+      fetchData()
+    } else {
+      return null
+    }
+  }, [idData])
+
+  // const handleClick = i => {
+  //   console.log(i)
+  //   setIdData(i)
+  //   return (
+  //     <>
+  //       {' '}
+  //       <CocktailItem apiInfo={retrievedData} />
+  //     </>
+  //   )
+  // }
+  const allSavedItems = i => {
+    // i.forEach(ele => setIdData(ele))
+
+    const newData = new Set(i)
+
+    const returnedData = [...newData]
+    console.log(returnedData)
+    // console.log(i)
+
+    return returnedData.map(ele => (
+      <ul>
+        <li id={ele}>
+          {ele}{' '}
+          <button id={ele} onClick={() => setIdData(ele)}>
+            View
+          </button>
+          {retrievedData && retrievedData.drinks[0].strDrink === ele && (
+            <CocktailItem apiInfo={retrievedData} />
+          )}
+          {/* {retrievedData !== undefined &&
+          retrievedData.drinks[0].strDrink === { ele } ? (
+            <CocktailItem apiInfo={retrievedData} />
+          ) : null} */}
+        </li>
+      </ul>
+    ))
+  }
+
+  // return <>{state.ids.length > 0 && state.ids.map(i => <p>{i}</p>)}</>
+  return <>{state.ids.length > 0 && allSavedItems(state.ids)}</>
 }
 
 // Component to display saved Cocktail list
 
 // Component to display cocktail items passed to apiInfo param
-const CocktailItem = ({ apiInfo }) => {
+export const CocktailItem = ({ apiInfo }) => {
   const [state, dispatch] = useContext(Context)
 
   // Refs to handle ReactToPrint
@@ -145,8 +213,7 @@ const CocktailItem = ({ apiInfo }) => {
 
   // function to handle save icon
   const handleSave = e => {
-    console.log(e)
-    localStorage.setItem('id', e.target.id)
+    // localStorage.setItem('id', e.target.id)
     dispatch({
       type: 'ADD_ID',
       payload: e.target.id,
@@ -167,10 +234,9 @@ const CocktailItem = ({ apiInfo }) => {
         <RiPrinterLine />
       </button>
       <button
-        id={apiInfo.drinks[0].idDrink}
+        id={apiInfo.drinks[0].strDrink}
         className="action-buttons"
         onClick={e => handleSave(e)}
-        data-name={apiInfo.drinks[0].strDrink}
       >
         <RiSave3Line />
       </button>
@@ -181,8 +247,6 @@ const CocktailItem = ({ apiInfo }) => {
 export const CocktailSearch = () => {
   // initiate misMount
   const isMount = useIsMount()
-
-  const [state, dispatch] = useContext(Context)
 
   // State variable for handling text input
   const [input, setInput] = useState('')
@@ -208,9 +272,6 @@ export const CocktailSearch = () => {
 
   // Refs to handle ReactToPrint
   const componentRef = useRef()
-  const handlePrint = useReactToPrint({
-    content: () => componentRef.current,
-  })
 
   // Handle submitted search value
   const handleSubmit = e => {
@@ -307,7 +368,7 @@ export const CocktailSearch = () => {
       <ClipLoader loading={loading} color={color} />
 
       {apiInfo && <CocktailItem apiInfo={apiInfo} />}
-      {state && <SavedCocktails />}
+
       {apiInfo && similarItems(apiInfo)}
       {searchForm()}
     </div>

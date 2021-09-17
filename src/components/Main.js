@@ -7,6 +7,7 @@ import {
   RandomCocktail,
   CategorySearch,
   IngredientSearch,
+  SavedCocktails,
 } from './search'
 
 class Main extends React.Component {
@@ -77,6 +78,18 @@ class Main extends React.Component {
               ingredients to make your search more specific.{' '}
             </p>
             <IngredientSearch />
+            {close}
+          </article>
+          <article
+            id="rep-saved"
+            className={`${this.props.article === 'rep-saved' ? 'active' : ''} ${
+              this.props.articleTimeout ? 'timeout' : ''
+            }`}
+            style={{ display: 'none' }}
+          >
+            <h2 className="major">Saved</h2>
+            <p>View saved cocktails </p>
+            <SavedCocktails />
             {close}
           </article>
           {/* <Store></Store> */}
