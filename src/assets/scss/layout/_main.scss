@@ -86,6 +86,23 @@
     }
   }
 
+  .saved-item {
+    display: grid;
+    border: 1px solid white;
+    padding: 1em;
+
+    .saved-one {
+      flex: 0 0 5em;
+      justify-self: center;
+      align-self: center;
+      padding-right: 1em;
+    }
+
+    .saved-two {
+      flex: 0 0 5em;
+    }
+  }
+
   article {
     @include vendor('transform', 'translateY(0.25rem)');
     @include vendor(

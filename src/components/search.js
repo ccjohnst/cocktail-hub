@@ -123,23 +123,31 @@ const ingredients = api => {
   )
 }
 
-// Component to display saved Cocktail
+// Component to display saved Cocktails
 export const SavedCocktails = () => {
   const isMount = useIsMount()
 
   // Import the context and provide to UseContext hook as an argument
   const [state, dispatch] = useContext(Context)
 
+  // State hook for setting ID data to be used for fetching API data
   const [idData, setIdData] = useState()
 
+  // State hook for containing retrieved API data
   const [retrievedData, setRetrievedData] = useState()
+
+  // State hook for handling reset on 'hide' button click
+  const [reset, setReset] = useState(false)
 
   useEffect(() => {
     // parameter that contains search query
     const searchParam = 'search.php?s='
 
-    // If isMount not true, then it is not first render and can fetch API data
-    if (!isMount) {
+    // If reset is true, return nothing as hide button has been selected
+    // else if isMount not true, then it is not first render and can fetch API data
+    if (reset) {
+      return null
+    } else if (!isMount) {
       const fetchData = async () => {
         const url = `.netlify/functions/get-data?param=${searchParam}&id=${idData}`
 
@@ -157,49 +165,69 @@ export const SavedCocktails = () => {
     }
   }, [idData])
 
-  // const handleClick = i => {
-  //   console.log(i)
-  //   setIdData(i)
-  //   return (
-  //     <>
-  //       {' '}
-  //       <CocktailItem apiInfo={retrievedData} />
-  //     </>
-  //   )
-  // }
-  const allSavedItems = i => {
-    // i.forEach(ele => setIdData(ele))
+  // Handle hide cocktail functionality by setting idData state to false
+  const hideCocktail = e => {
+    setIdData()
+    setRetrievedData()
+    setReset(true)
+  }
 
+  // Handle view button functionality by setting idData state to id
+  const handleButton = e => {
+    setIdData(e.target.id)
+    setReset(false)
+  }
+
+  // function to return all saved cocktails
+  const allSavedItems = i => {
     const newData = new Set(i)
 
     const returnedData = [...newData]
     console.log(returnedData)
-    // console.log(i)
 
-    return returnedData.map(ele => (
-      <ul>
-        <li id={ele}>
-          {ele}{' '}
-          <button id={ele} onClick={() => setIdData(ele)}>
-            View
-          </button>
-          {retrievedData && retrievedData.drinks[0].strDrink === ele && (
-            <CocktailItem apiInfo={retrievedData} />
-          )}
-          {/* {retrievedData !== undefined &&
-          retrievedData.drinks[0].strDrink === { ele } ? (
-            <CocktailItem apiInfo={retrievedData} />
-          ) : null} */}
-        </li>
+    return (
+      <ul className="saved-list">
+        {returnedData.map(ele => (
+          <li className="saved-item" id={ele}>
+            <h3 className="saved-one">{ele}</h3>
+            {retrievedData && retrievedData.drinks[0].strDrink === ele && (
+              <CocktailItem apiInfo={retrievedData} />
+            )}
+            {retrievedData !== undefined ? (
+              retrievedData.drinks[0].strDrink === ele ? (
+                <button
+                  className="saved-two"
+                  id={ele}
+                  onClick={e => hideCocktail(e)}
+                >
+                  Hide
+                </button>
+              ) : (
+                <button id={ele} onClick={e => handleButton(e)}>
+                  View
+                </button>
+              )
+            ) : (
+              <button id={ele} onClick={e => handleButton(e)}>
+                View
+              </button>
+            )}
+          </li>
+        ))}
       </ul>
-    ))
+    )
   }
-
-  // return <>{state.ids.length > 0 && state.ids.map(i => <p>{i}</p>)}</>
-  return <>{state.ids.length > 0 && allSavedItems(state.ids)}</>
+  // if there are saved cocktails in state, then display all Saved items
+  return (
+    <>
+      {state.ids.length > 0 ? (
+        allSavedItems(state.ids)
+      ) : (
+        <p className="error-message">No saved cocktails found</p>
+      )}
+    </>
+  )
 }
-
-// Component to display saved Cocktail list
 
 // Component to display cocktail items passed to apiInfo param
 export const CocktailItem = ({ apiInfo }) => {
@@ -213,10 +241,11 @@ export const CocktailItem = ({ apiInfo }) => {
 
   // function to handle save icon
   const handleSave = e => {
+    console.log(e)
     // localStorage.setItem('id', e.target.id)
     dispatch({
       type: 'ADD_ID',
-      payload: e.target.id,
+      payload: e.currentTarget.id,
     })
   }
 
@@ -427,24 +456,9 @@ export const RandomCocktail = () => {
   return (
     <>
       <ClipLoader loading={loading} color={color} />
-      <h3>{randomApi && randomApi.drinks[0].strDrink}</h3>
 
-      <span className="image main">
-        {randomApi && <img src={randomApi.drinks[0].strDrinkThumb} alt="" />}
-      </span>
       {/* If RandomAPI true then show intructions and ingrdients */}
-      {randomApi && (
-        <>
-          <h4>Instructions</h4>
-          <p>{randomApi.drinks[0].strInstructions}</p>
-        </>
-      )}
-      {randomApi && (
-        <>
-          <h4>Ingredients</h4>
-          <ol>{ingredients(randomApi.drinks[0])}</ol>
-        </>
-      )}
+      {randomApi && <CocktailItem apiInfo={randomApi} />}
       <button onClick={() => setRandomApi()}>Randomise</button>
     </>
   )
