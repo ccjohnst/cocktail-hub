@@ -1,8 +1,22 @@
 import { CONDITIONAL_TYPES } from '@babel/types'
-import React, { useRef, useState, useEffect, isValidElement } from 'react'
+import React, {
+  useRef,
+  useState,
+  useEffect,
+  isValidElement,
+  createContext,
+  useContext,
+} from 'react'
+
 import Creatable from 'react-select/creatable'
 import ClipLoader from 'react-spinners/ClipLoader'
 
+import { useReactToPrint } from 'react-to-print'
+import { RiPrinterLine } from '@react-icons/all-files/ri/RiPrinterLine'
+import { RiHeart2Line } from '@react-icons/all-files/ri/RiHeart2Line'
+import { RiHeart3Fill } from '@react-icons/all-files/ri/RiHeart3Fill'
+
+import { Context } from '../components/global/Store'
 const color = '#ffffff'
 // Custom hook to indicate whether current render is first render
 const useIsMount = () => {
@@ -13,15 +27,10 @@ const useIsMount = () => {
   return isMountRef.current
 }
 
-// Component for displaying loading icon
-const Loader = loadingState => {
-  return <p>loading...</p>
-}
-
 // Function to create list items for measurements and ingredients
 const ingredients = api => {
   return (
-    <>
+    <ol className="ingredient-list-items">
       {api.strIngredient1 && (
         <li>
           {' '}
@@ -111,14 +120,145 @@ const ingredients = api => {
           {api.strMeasure15} {api.strIngredient15}
         </li>
       )}
+    </ol>
+  )
+}
+
+// Component to display saved Cocktails
+export const SavedCocktails = () => {
+  const isMount = useIsMount()
+
+  // Import the context and provide to UseContext hook as an argument
+  const [state, dispatch] = useContext(Context)
+
+  // State hook for setting ID data to be used for fetching API data
+  const [idData, setIdData] = useState()
+
+  // State hook for containing retrieved API data
+  const [retrievedData, setRetrievedData] = useState()
+
+  // State hook for handling reset on 'hide' button click
+  const [reset, setReset] = useState(false)
+
+  useEffect(() => {
+    // parameter that contains search query
+    const searchParam = 'search.php?s='
+
+    // If reset is true, return nothing as hide button has been selected
+    // else if isMount not true, then it is not first render and can fetch API data
+    if (reset) {
+      return null
+    } else if (!isMount) {
+      const fetchData = async () => {
+        const url = `.netlify/functions/get-data?param=${searchParam}&id=${idData}`
+
+        try {
+          const response = await fetch(url).then(res => res.json())
+          setRetrievedData(response)
+        } catch (error) {
+          console.log('error', error)
+        }
+      }
+
+      fetchData()
+    } else {
+      return null
+    }
+  }, [idData])
+
+  // Handle hide cocktail functionality by setting idData state to false
+  const hideCocktail = e => {
+    setIdData()
+    setRetrievedData()
+    setReset(true)
+  }
+
+  // Handle view button functionality by setting idData state to id
+  const handleButton = e => {
+    setIdData(e.target.id)
+    setReset(false)
+  }
+
+  // function to return all saved cocktails
+  const allSavedItems = i => {
+    // remove duplicates from array
+    const newData = new Set(i)
+
+    // transform returned set back into array
+    const returnedData = [...newData]
+
+    return (
+      <ul className="saved-list">
+        {returnedData.map(ele => (
+          <li className="saved-item" id={ele}>
+            <h3 className="saved-one">{ele}</h3>
+            {retrievedData && retrievedData.drinks[0].strDrink === ele && (
+              <CocktailItem apiInfo={retrievedData} />
+            )}
+            {retrievedData !== undefined ? (
+              retrievedData.drinks[0].strDrink === ele ? (
+                <button
+                  className="saved-two"
+                  id={ele}
+                  onClick={e => hideCocktail(e)}
+                >
+                  Hide
+                </button>
+              ) : (
+                <button id={ele} onClick={e => handleButton(e)}>
+                  View
+                </button>
+              )
+            ) : (
+              <button id={ele} onClick={e => handleButton(e)}>
+                View
+              </button>
+            )}
+          </li>
+        ))}
+      </ul>
+    )
+  }
+  // if there are saved cocktails in state, then display all Saved items
+  return (
+    <>
+      {state.ids.length > 0 ? (
+        allSavedItems(state.ids)
+      ) : (
+        <p className="error-message">No saved cocktails found</p>
+      )}
     </>
   )
 }
 
-// Function to display cocktail items passed to apiInfo param
-const cocktailItem = apiInfo => {
+// Component to display cocktail items passed to apiInfo param
+export const CocktailItem = ({ apiInfo }) => {
+  const [state, dispatch] = useContext(Context)
+
+  // Refs to handle ReactToPrint
+  const componentRef = useRef()
+  const handlePrint = useReactToPrint({
+    content: () => componentRef.current,
+  })
+
+  // function to handle save icon
+  const handleSave = e => {
+    // localStorage.setItem('id', e.target.id)
+    dispatch({
+      type: 'ADD_ID',
+      payload: e.currentTarget.id,
+    })
+  }
+
+  const handleDelete = e => {
+    dispatch({
+      type: 'REMOVE_ID',
+      payload: e.currentTarget.id,
+    })
+  }
+
   return (
-    <>
+    <div className="cocktail" ref={componentRef}>
       <h3>{apiInfo.drinks[0].strDrink}</h3>
       <span className="image main">
         <img src={apiInfo.drinks[0].strDrinkThumb} alt="" />
@@ -126,8 +266,28 @@ const cocktailItem = apiInfo => {
       <h4>Instructions</h4>
       <p>{apiInfo.drinks[0].strInstructions}</p>
       <h4>Ingredients</h4>
-      <ol>{ingredients(apiInfo.drinks[0])}</ol>
-    </>
+      {ingredients(apiInfo.drinks[0])}
+      <button className="action-buttons" onClick={handlePrint}>
+        <RiPrinterLine />
+      </button>
+      {state.ids.includes(apiInfo.drinks[0].strDrink) ? (
+        <button
+          id={apiInfo.drinks[0].strDrink}
+          className="action-buttons"
+          onClick={e => handleDelete(e)}
+        >
+          <RiHeart3Fill />
+        </button>
+      ) : (
+        <button
+          id={apiInfo.drinks[0].strDrink}
+          className="action-buttons"
+          onClick={e => handleSave(e)}
+        >
+          <RiHeart2Line />
+        </button>
+      )}
+    </div>
   )
 }
 
@@ -156,6 +316,9 @@ export const CocktailSearch = () => {
 
     setInput(value)
   }
+
+  // Refs to handle ReactToPrint
+  const componentRef = useRef()
 
   // Handle submitted search value
   const handleSubmit = e => {
@@ -211,7 +374,7 @@ export const CocktailSearch = () => {
     const data = api.drinks
     if (data.length > 1) {
       return (
-        <>
+        <div className="similiar-items">
           <h4>View similar items</h4>
           <ul>
             {data.map(item => (
@@ -222,7 +385,7 @@ export const CocktailSearch = () => {
               </li>
             ))}
           </ul>
-        </>
+        </div>
       )
     }
   }
@@ -248,15 +411,14 @@ export const CocktailSearch = () => {
   }
   // Otherwise, return regular form and drinks details
   return (
-    <>
-      {/* {loading ?   <Loader loadingState={loading}/> : null } */}
+    <div ref={componentRef}>
       <ClipLoader loading={loading} color={color} />
 
-      {apiInfo && <>{cocktailItem(apiInfo)}</>}
+      {apiInfo && <CocktailItem apiInfo={apiInfo} />}
 
       {apiInfo && similarItems(apiInfo)}
       {searchForm()}
-    </>
+    </div>
   )
 }
 
@@ -312,24 +474,9 @@ export const RandomCocktail = () => {
   return (
     <>
       <ClipLoader loading={loading} color={color} />
-      <h3>{randomApi && randomApi.drinks[0].strDrink}</h3>
 
-      <span className="image main">
-        {randomApi && <img src={randomApi.drinks[0].strDrinkThumb} alt="" />}
-      </span>
       {/* If RandomAPI true then show intructions and ingrdients */}
-      {randomApi && (
-        <>
-          <h4>Instructions</h4>
-          <p>{randomApi.drinks[0].strInstructions}</p>
-        </>
-      )}
-      {randomApi && (
-        <>
-          <h4>Ingredients</h4>
-          <ol>{ingredients(randomApi.drinks[0])}</ol>
-        </>
-      )}
+      {randomApi && <CocktailItem apiInfo={randomApi} />}
       <button onClick={() => setRandomApi()}>Randomise</button>
     </>
   )
@@ -457,6 +604,8 @@ export const CategorySearch = () => {
     setSelectedCocktailID()
     setReset(true)
   }
+
+  // DIsplay all cocktails within category
   const displayCocktailList = api => {
     return (
       <>
@@ -468,8 +617,9 @@ export const CategorySearch = () => {
             {/* Only show selected cocktail if CocktailID is true */}
             {cocktailID && (
               <div className="view-cocktail">
-                {cata.idDrink === cocktailID.drinks[0].idDrink &&
-                  cocktailItem(cocktailID)}
+                {cata.idDrink === cocktailID.drinks[0].idDrink && (
+                  <CocktailItem apiInfo={cocktailID} />
+                )}
               </div>
             )}
             {/* If cocktail ID is not undefined and therefore has been set for viewing
@@ -510,9 +660,9 @@ export const CategorySearch = () => {
         {categories.length > 0 && displayCategories(categories)}
       </select>
       <ClipLoader loading={loading} color={color} />
-      <ul className="ingredient-list">
+      <div className="ingredient-list">
         {cocktailList.length > 0 && displayCocktailList(cocktailList)}
-      </ul>
+      </div>
     </>
   )
 }
@@ -641,6 +791,7 @@ export const IngredientSearch = () => {
     setReset(true)
   }
 
+  // Display list of all cocktails found by ingredient
   const displayCocktailList = api => {
     if (api[0] === 'None Found') {
       return (
@@ -660,8 +811,9 @@ export const IngredientSearch = () => {
 
               {cocktailID && (
                 <div className="view-cocktail">
-                  {cata.idDrink === cocktailID.drinks[0].idDrink &&
-                    cocktailItem(cocktailID)}
+                  {cata.idDrink === cocktailID.drinks[0].idDrink && (
+                    <CocktailItem apiInfo={cocktailID} />
+                  )}
                 </div>
               )}
               {cocktailID !== undefined ? (
@@ -685,7 +837,7 @@ export const IngredientSearch = () => {
       )
     }
   }
-  const color = 'rgba(27, 31, 34, 0.85)'
+
   // Otherwise, return regular form and drinks details
   return (
     <>

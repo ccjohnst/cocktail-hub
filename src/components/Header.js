@@ -64,6 +64,15 @@ const Header = props => (
             Ingredients
           </button>
         </li>
+        <li>
+          <button
+            onClick={() => {
+              props.onOpenArticle('rep-saved')
+            }}
+          >
+            saved
+          </button>
+        </li>
       </ul>
     </nav>
   </header>
