@@ -13,7 +13,8 @@ import ClipLoader from 'react-spinners/ClipLoader'
 
 import { useReactToPrint } from 'react-to-print'
 import { RiPrinterLine } from '@react-icons/all-files/ri/RiPrinterLine'
-import { RiSave3Line } from '@react-icons/all-files/ri/RiSave3Line'
+import { RiHeart2Line } from '@react-icons/all-files/ri/RiHeart2Line'
+import { RiHeart3Fill } from '@react-icons/all-files/ri/RiHeart3Fill'
 
 import { Context } from '../components/global/Store'
 const color = '#ffffff'
@@ -180,10 +181,11 @@ export const SavedCocktails = () => {
 
   // function to return all saved cocktails
   const allSavedItems = i => {
+    // remove duplicates from array
     const newData = new Set(i)
 
+    // transform returned set back into array
     const returnedData = [...newData]
-    console.log(returnedData)
 
     return (
       <ul className="saved-list">
@@ -241,10 +243,16 @@ export const CocktailItem = ({ apiInfo }) => {
 
   // function to handle save icon
   const handleSave = e => {
-    console.log(e)
     // localStorage.setItem('id', e.target.id)
     dispatch({
       type: 'ADD_ID',
+      payload: e.currentTarget.id,
+    })
+  }
+
+  const handleDelete = e => {
+    dispatch({
+      type: 'REMOVE_ID',
       payload: e.currentTarget.id,
     })
   }
@@ -262,13 +270,23 @@ export const CocktailItem = ({ apiInfo }) => {
       <button className="action-buttons" onClick={handlePrint}>
         <RiPrinterLine />
       </button>
-      <button
-        id={apiInfo.drinks[0].strDrink}
-        className="action-buttons"
-        onClick={e => handleSave(e)}
-      >
-        <RiSave3Line />
-      </button>
+      {state.ids.includes(apiInfo.drinks[0].strDrink) ? (
+        <button
+          id={apiInfo.drinks[0].strDrink}
+          className="action-buttons"
+          onClick={e => handleDelete(e)}
+        >
+          <RiHeart3Fill />
+        </button>
+      ) : (
+        <button
+          id={apiInfo.drinks[0].strDrink}
+          className="action-buttons"
+          onClick={e => handleSave(e)}
+        >
+          <RiHeart2Line />
+        </button>
+      )}
     </div>
   )
 }
@@ -586,6 +604,8 @@ export const CategorySearch = () => {
     setSelectedCocktailID()
     setReset(true)
   }
+
+  // DIsplay all cocktails within category
   const displayCocktailList = api => {
     return (
       <>
@@ -771,6 +791,7 @@ export const IngredientSearch = () => {
     setReset(true)
   }
 
+  // Display list of all cocktails found by ingredient
   const displayCocktailList = api => {
     if (api[0] === 'None Found') {
       return (

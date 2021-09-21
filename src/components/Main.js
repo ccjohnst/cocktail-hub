@@ -88,7 +88,6 @@ class Main extends React.Component {
             style={{ display: 'none' }}
           >
             <h2 className="major">Saved</h2>
-            <p>View saved cocktails </p>
             <SavedCocktails />
             {close}
           </article>

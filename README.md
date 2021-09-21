@@ -28,7 +28,6 @@ npm start
 
 ## Future features
 
-- Create a search via ingredient function.
 - Refactor code within search components to be more DRY
 - Implement a toggle using a REGEX script to turn the imperial measurements into metric.
 - Implement a feature that allows users to save cocktails via localstorage.
