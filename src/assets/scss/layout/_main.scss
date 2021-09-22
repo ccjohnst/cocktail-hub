@@ -86,20 +86,25 @@
     }
   }
 
+  .saved-list {
+    list-style: none;
+    padding-left: 0;
+  }
+
   .saved-item {
     display: grid;
     border: 1px solid white;
+    border-color: hsl(0, 0%, 80%);
+    border-style: solid;
+    border-width: 1px;
+    border-radius: 4px;
     padding: 1em;
+    margin-top: 1em;
 
     .saved-one {
       flex: 0 0 5em;
       justify-self: center;
       align-self: center;
-      padding-right: 1em;
-    }
-
-    .saved-two {
-      flex: 0 0 5em;
     }
   }
 

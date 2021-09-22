@@ -28,9 +28,10 @@ npm start
 
 ## Future features
 
+- ~~Create a search via ingredient function.~~ **Complete**
 - Refactor code within search components to be more DRY
 - Implement a toggle using a REGEX script to turn the imperial measurements into metric.
-- Implement a feature that allows users to save cocktails via localstorage.
+- ~~Implement a feature that allows users to save cocktails via localstorage.~~ **Complete**
 - Implement user authentication and a login system in which users can save cocktails to their account.
 
 ## Built with
