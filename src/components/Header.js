@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import cocktail from '../images/cocktails.svg'
+import NavBar from './nav-bar'
 
 const Header = props => (
   <header id="header" style={props.timeout ? { display: 'none' } : {}}>
@@ -62,15 +63,6 @@ const Header = props => (
             }}
           >
             Ingredients
-          </button>
-        </li>
-        <li>
-          <button
-            onClick={() => {
-              props.onOpenArticle('rep-saved')
-            }}
-          >
-            saved
           </button>
         </li>
       </ul>
