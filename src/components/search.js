@@ -156,7 +156,7 @@ export const SavedCocktails = () => {
           const response = await fetch(url).then(res => res.json())
           setRetrievedData(response)
         } catch (error) {
-          console.log('error', error)
+          console.error('error', error)
         }
       }
 
@@ -359,7 +359,7 @@ export const CocktailSearch = () => {
           setSearched(true)
           setLoading(false)
         } catch (error) {
-          console.log('error', error)
+          console.error('error', error)
         }
       }
 
@@ -447,7 +447,7 @@ export const RandomCocktail = () => {
           const response = await fetch(url).then(res => res.json())
           setRandomApi(response)
         } catch (error) {
-          console.log('error', error)
+          console.error('error', error)
         }
       }
 
@@ -464,7 +464,7 @@ export const RandomCocktail = () => {
           setRandomApi(response)
           setLoading(false)
         } catch (error) {
-          console.log('error', error)
+          console.error('error', error)
         }
       }
       fetchData()
@@ -520,7 +520,7 @@ export const CategorySearch = () => {
           // Set state to array of the json drinks categories
           setCategories(oldData => [...oldData, response.drinks])
         } catch (error) {
-          console.log('error', error)
+          console.error('error', error)
         }
       }
 
@@ -543,7 +543,7 @@ export const CategorySearch = () => {
           setCocktailList(oldData => [response.drinks])
           setLoading(false)
         } catch (error) {
-          console.log('error', error)
+          console.error('error', error)
         }
       }
 
@@ -568,7 +568,7 @@ export const CategorySearch = () => {
           const response = await fetch(url).then(res => res.json())
           setCocktailID(response)
         } catch (error) {
-          console.log('error', error)
+          console.error('error', error)
         }
       }
 
@@ -743,7 +743,7 @@ export const IngredientSearch = () => {
           setIngredient(oldData => [response.drinks])
           setLoading(false)
         } catch (error) {
-          console.log('error', error)
+          console.error('error', error)
         }
       }
 
@@ -768,7 +768,7 @@ export const IngredientSearch = () => {
           const response = await fetch(url).then(res => res.json())
           setCocktailID(response)
         } catch (error) {
-          console.log('error', error)
+          console.error('error', error)
         }
       }
 

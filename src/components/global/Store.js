@@ -12,7 +12,7 @@ const Store = ({ children }) => {
   // useEffect hook to retrieve saved cocktails in localStorage
   useEffect(() => {
     const stateData = JSON.parse(localStorage.getItem('state'))
-    console.log(stateData)
+
     // if saved cocktails localstorage item exists, set global state to the cocktail IDs
     if (stateData) {
       dispatch({
