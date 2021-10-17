@@ -2,13 +2,11 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import Store from './global/Store'
 
-import {
-  CocktailSearch,
-  RandomCocktail,
-  CategorySearch,
-  IngredientSearch,
-  SavedCocktails,
-} from './search'
+import { CocktailSearch } from './cocktail-components/CocktailSearch'
+import { RandomCocktail } from './cocktail-components/RandomCocktail'
+import { SavedCocktails } from './cocktail-components/SavedCocktail'
+import { CategorySearch } from './cocktail-components/CategorySearch'
+import { IngredientSearch } from './cocktail-components/IngredientSearch'
 
 class Main extends React.Component {
   render() {
