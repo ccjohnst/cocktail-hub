@@ -39,4 +39,80 @@ npm start
 - [React](https://reactjs.org/)
 - [GatsbyJS](https://www.gatsbyjs.com/)
 - [TheCocktailDB's API](https://www.thecocktaildb.com/api.php)
+- [React Select](https://react-select.com/home)
+- [React Spinners](https://www.npmjs.com/package/react-spinners)
+- [React Icons](https://react-icons.github.io/react-icons/)
+- [react-to-print](https://www.npmjs.com/package/react-to-print)
+- [Node Sass](https://www.npmjs.com/package/node-sass)
 - [Dimension Template](https://html5up.net/) - Template
+
+# APIs Reference
+
+A reference point for how the components/APIs function within this web application.
+
+The business logic for this application can be found within the [/srs/components/cocktail-components/](/src/components/cocktail-components/) folder.
+
+## Cocktail Components - Reference Guide
+
+### Cocktail Item - [/src/components/cocktail-components/CocktailItem.js](/src/components/cocktail-componenets/CocktailItem.js)
+
+```js
+<CocktailItem />
+```
+A standarised component to render a cocktail item when passed with retrieved API information. Used within most most cocktail components.
+
+This component has a save and print button, which allows for saving the the cocktail item to local storage and allows the user to print/save as PDF.
+#### Props
+- `apiInfo={}` - A prop to pass down retrieved API information so it can be displayed as a cocktail item.
+
+<br>
+
+### Category Search - [/src/components/cocktail-components/CategorySearch.js](/src/components/cocktail-componenets/CategorySearch.js)
+
+```js
+<CategorySearch />
+```
+
+A component that queries the API for a list of all categories and displays them as a drop down selection list. Upon selection of any of the categories, the component returns a list of all cocktails that fall within the category. By clicking the 'View' button on a particular cocktail entry, a CocktailItem component is generated using the selected cocktail's ID as the prop.
+
+<br>
+
+### Cocktail Search - [/src/components/cocktail-components/CocktailSearch.js](/src/components/cocktail-componenets/CocktailSearch.js)
+
+```js
+<CocktailSarch />
+```
+
+A component that returns an input form in which users can search specific cocktails. After a search term is submitted, the API is queried and if a match is found, the CocktailItem component generates the entry. If the search term could be multiple different cocktails (e.g. searching 'Gin' returns multiple results), the first result is used and a list of items with similiar names is returned.
+
+<br>
+
+### IngredientSearch - [/src/components/cocktail-components/IngredientSearch.js](/src/components/cocktail-componenets/IngredientSearch.js)
+
+```js
+<IngredientSearch />
+```
+
+This component utilises the react-select package and populates itself with a list of hard-coded predefined common ingredients. The user can also input their own ingredients to search. If multiple ingredients are searched, the component will query the API for cocktails that contain all of the listed ingredients within the cocktail's ingredient list.
+
+<br>
+
+### Random Cocktail - [/src/components/cocktail-components/RandomCocktail.js](/src/components/cocktail-componenets/RandomCocktail.js)
+
+```js
+<RandomCocktail />
+```
+
+A component that returns a random cocktail upon page load. By clicking the randomise button, the component queries the API again to retrieve another random cocktail, which is passed to the CocktailItem component for display.
+
+<br>
+
+### Saved Cocktails - [/src/components/cocktail-components/SavedCocktail.js](/src/components/cocktail-componenets/SavedCocktails.js)
+
+```js
+<SavedCocktails />
+```
+
+The SavedCocktails component accesses the global persistant state set up in [/src/components/global/Store.js](/src/components/global/Sotre.js) and returns a list of the names of all cocktails saved into local storage. A view button is generated which when clicked renders a CocktailItem with the retrieved API information. If there are no cocktails saved, an error message is generated.
+
+<br>
