@@ -16,6 +16,12 @@ A second 'testing' branch exists in order for me to develop and test new feature
 
 To deploy Cocktail Hub, I decided to use [Netlify](https://www.netlify.com/) for a number of reasons. Firstly, Netlify allows for easy deployment of GatsbyJS web-apps which allows me to spend more time improving rhe codebase. Secondly, having purchased an upgraded API key to enhance the Cocktail Hub's functionality, [Netlify's Functions](https://www.netlify.com/products/functions/) allows me to easily deploy server-side code to serve as a proxy for requests made to the CocktailDB's API with my secret key.
 
+## Challenges
+
+Error handling was made difficult by the server returning a '200 OK' status response when the API was queried for cocktails that did not exist in the database. Instead, a response body of 'drinks: null' or 'drinks: not found' would be sent. This meant that I had to implement conditionals that would render whether an error message would display depending on the response of the returned body for the 'drinks' object, rather than using status codes which would be more elegant.
+
+In order to implement global state within Gatsby, it was necessary to create a 'Store' component, which would contain the global state. The Store component which accepts the a context object we import and create in Store.js. To access this global state within the application, we call the 'useContext()' hooks within the application's components.
+
 ## Getting started
 
 ```
@@ -59,10 +65,13 @@ The business logic for this application can be found within the [/srs/components
 ```js
 <CocktailItem />
 ```
+
 A standarised component to render a cocktail item when passed with retrieved API information. Used within most most cocktail components.
 
 This component has a save and print button, which allows for saving the the cocktail item to local storage and allows the user to print/save as PDF.
+
 #### Props
+
 - `apiInfo={}` - A prop to pass down retrieved API information so it can be displayed as a cocktail item.
 
 <br>

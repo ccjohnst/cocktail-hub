@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react'
 
+// Variable
 const isBrowser = typeof window !== 'undefined'
 
 // Initialise useIsMount

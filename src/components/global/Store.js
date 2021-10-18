@@ -1,11 +1,13 @@
 import React, { createContext, useReducer, useEffect } from 'react'
 import Reducer from './Reducer'
 
+// Variable to hold blank initial state
 const initialState = {
   ids: [],
   error: null,
 }
 
+// Global state provider component for saving stored cocktails to local storage
 const Store = ({ children }) => {
   const [state, dispatch] = useReducer(Reducer, initialState)
 
