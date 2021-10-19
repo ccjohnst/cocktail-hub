@@ -60,7 +60,7 @@ The business logic for this application can be found within the [/srs/components
 
 ## Cocktail Components - Reference Guide
 
-### Cocktail Item - [/src/components/cocktail-components/CocktailItem.js](/src/components/cocktail-componenets/CocktailItem.js)
+### Cocktail Item - [/src/components/cocktail-components/CocktailItem.js](/src/components/cocktail-components/CocktailItem.js)
 
 ```js
 <CocktailItem />
@@ -76,7 +76,7 @@ This component has a save and print button, which allows for saving the the cock
 
 <br>
 
-### Category Search - [/src/components/cocktail-components/CategorySearch.js](/src/components/cocktail-componenets/CategorySearch.js)
+### Category Search - [/src/components/cocktail-components/CategorySearch.js](/src/components/cocktail-components/CategorySearch.js)
 
 ```js
 <CategorySearch />
@@ -86,7 +86,7 @@ A component that queries the API for a list of all categories and displays them 
 
 <br>
 
-### Cocktail Search - [/src/components/cocktail-components/CocktailSearch.js](/src/components/cocktail-componenets/CocktailSearch.js)
+### Cocktail Search - [/src/components/cocktail-components/CocktailSearch.js](/src/components/cocktail-components/CocktailSearch.js)
 
 ```js
 <CocktailSarch />
@@ -96,7 +96,7 @@ A component that returns an input form in which users can search specific cockta
 
 <br>
 
-### IngredientSearch - [/src/components/cocktail-components/IngredientSearch.js](/src/components/cocktail-componenets/IngredientSearch.js)
+### IngredientSearch - [/src/components/cocktail-components/IngredientSearch.js](/src/components/cocktail-components/IngredientSearch.js)
 
 ```js
 <IngredientSearch />
@@ -106,7 +106,7 @@ This component utilises the react-select package and populates itself with a lis
 
 <br>
 
-### Random Cocktail - [/src/components/cocktail-components/RandomCocktail.js](/src/components/cocktail-componenets/RandomCocktail.js)
+### Random Cocktail - [/src/components/cocktail-components/RandomCocktail.js](/src/components/cocktail-components/RandomCocktail.js)
 
 ```js
 <RandomCocktail />
@@ -116,7 +116,7 @@ A component that returns a random cocktail upon page load. By clicking the rando
 
 <br>
 
-### Saved Cocktails - [/src/components/cocktail-components/SavedCocktail.js](/src/components/cocktail-componenets/SavedCocktails.js)
+### Saved Cocktails - [/src/components/cocktail-components/SavedCocktail.js](/src/components/cocktail-components/SavedCocktails.js)
 
 ```js
 <SavedCocktails />
