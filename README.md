@@ -22,14 +22,30 @@ Error handling was made difficult by the server returning a '200 OK' status resp
 
 In order to implement global state within Gatsby, it was necessary to create a 'Store' component, which would contain the global state. The Store component which accepts the a context object we import and create in Store.js. To access this global state within the application, we call the 'useContext()' hooks within the application's components.
 
-## Getting started
+## Getting started - Linux & Mac
+
+### Instructions - To use without free API key. PLEASE NOTE THAT MULTIPLE INGREDIENT SEARCH WILL NOT WORK USING FREE API KEY.
 
 ```
 nvm use 12.13.1 # To ensure good compatibility
 git clone https://github.com/ccjohnst/cocktail-hub
 cd cocktail-hub
 npm install
-npm start
+npm install netlify-cli --save-dev
+echo -e "API_KEY=1\nAPI_URL=https://www.thecocktaildb.com/api/json/v1/" > .env.development
+netlify dev
+```
+
+### Instructions - To use with paid API key
+
+```
+nvm use 12.13.1 # To ensure good compatibility
+git clone https://github.com/ccjohnst/cocktail-hub
+cd cocktail-hub
+npm install
+npm install netlify-cli --save-dev
+echo -e "API_KEY={YOUR API KEY HERE}\nAPI_URL=https://www.thecocktaildb.com/api/json/v2/" > .env.development
+netlify dev
 ```
 
 ## Future features
