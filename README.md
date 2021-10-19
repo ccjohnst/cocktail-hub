@@ -24,7 +24,7 @@ In order to implement global state within Gatsby, it was necessary to create a '
 
 ## Getting started - Linux & Mac
 
-### Instructions - To use without free API key. PLEASE NOTE THAT MULTIPLE INGREDIENT SEARCH WILL NOT WORK USING FREE API KEY.
+### Instructions - To use with free API key. PLEASE NOTE THAT MULTIPLE INGREDIENT SEARCH WILL NOT WORK USING FREE API KEY.
 
 ```
 nvm use 12.13.1 # To ensure good compatibility
