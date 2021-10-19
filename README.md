@@ -116,7 +116,7 @@ A component that returns a random cocktail upon page load. By clicking the rando
 
 <br>
 
-### Saved Cocktails - [/src/components/cocktail-components/SavedCocktail.js](/src/components/cocktail-components/SavedCocktails.js)
+### Saved Cocktails - [/src/components/cocktail-components/SavedCocktail.js](/src/components/cocktail-components/SavedCocktail.js)
 
 ```js
 <SavedCocktails />
